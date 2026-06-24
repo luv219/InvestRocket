@@ -10,12 +10,17 @@ Each phase must preserve the core constraint: Invest Rocket is a virtual simulat
 - Health endpoint and responsive UI shell
 - No entities, authentication, or trading logic
 
+Status: complete.
+
 ## Phase 1 — Identity and Wallet
 
 - User registration and login
 - Secure password hashing and JWT authentication
 - Virtual wallet and configurable starting balance
 - User and wallet persistence
+- Protected frontend dashboard and session restoration
+
+Status: complete. JWTs are stored in `localStorage` for development; production hardening should evaluate `httpOnly` cookies.
 
 ## Phase 2 — Market Discovery
 

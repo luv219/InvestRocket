@@ -6,6 +6,7 @@ import { LandingPage } from '../pages/LandingPage'
 import { LoginPage } from '../pages/LoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RegisterPage } from '../pages/RegisterPage'
+import { ProtectedRoute } from './ProtectedRoute'
 
 export function AppRoutes() {
   return (
@@ -14,7 +15,9 @@ export function AppRoutes() {
         <Route index element={<LandingPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
-        <Route path="dashboard" element={<DashboardPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="dashboard" element={<DashboardPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

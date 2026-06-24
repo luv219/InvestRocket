@@ -11,10 +11,12 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
 
 server:
   port: ${SERVER_PORT:8080}
@@ -22,6 +24,9 @@ server:
 app:
   cors:
     allowed-origin: ${FRONTEND_URL:http://localhost:5173}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   financial-api:
     provider: ${FINANCIAL_API_PROVIDER:finnhub}
     api-key: ${FINANCIAL_API_KEY:}

@@ -1,5 +1,7 @@
 import { Link, NavLink } from 'react-router-dom'
 
+import { useAuth } from '../features/auth/useAuth'
+
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-lg px-3 py-2 text-sm font-medium ${
     isActive
@@ -8,6 +10,8 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   }`
 
 export function Navbar() {
+  const { isAuthenticated, logout } = useAuth()
+
   return (
     <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -18,18 +22,32 @@ export function Navbar() {
           Invest Rocket
         </Link>
         <div className="flex items-center gap-1">
-          <NavLink to="/dashboard" className={navLinkClass}>
-            Dashboard
-          </NavLink>
-          <NavLink to="/login" className={navLinkClass}>
-            Login
-          </NavLink>
-          <Link
-            to="/register"
-            className="ml-2 rounded-lg bg-rocket-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-rocket-400"
-          >
-            Register
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <NavLink to="/dashboard" className={navLinkClass}>
+                Dashboard
+              </NavLink>
+              <button
+                type="button"
+                onClick={logout}
+                className="ml-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-white hover:border-slate-500 hover:bg-slate-800"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className={navLinkClass}>
+                Login
+              </NavLink>
+              <Link
+                to="/register"
+                className="ml-2 rounded-lg bg-rocket-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-rocket-400"
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </header>

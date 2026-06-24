@@ -44,7 +44,9 @@ Docker is also deferred. The placeholder directory reserves a location for backe
 
 ## Security
 
-Spring Security is installed, but Phase 0 permits all routes and contains no authentication logic. Phase 1 will introduce password hashing, JWT issuance and validation, authorization rules, and security-focused tests.
+Spring Security uses stateless JWT authentication. Registration and login are public, `/api/auth/me` is protected, and future API routes require authentication by default. Passwords are hashed with BCrypt, and JWT signing configuration comes from environment variables.
+
+The Phase 1 frontend stores the access token in `localStorage` for development simplicity. A production-grade deployment should evaluate secure `httpOnly` cookies and a CSRF strategy.
 
 ## Development
 

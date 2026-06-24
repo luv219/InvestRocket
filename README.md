@@ -4,21 +4,24 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 0 Status
+## Phase 1 Status
 
-Phase 0 establishes the monorepo, Spring Boot API, React interface, environment configuration, and architecture documentation. Authentication and trading features are intentionally not implemented yet.
+Phase 1 adds user registration, login, BCrypt password hashing, JWT authentication, protected frontend routes, and automatic creation of a virtual USD wallet with a starting balance of `$100,000.00`.
+
+Stock search, market data, orders, portfolio calculations, watchlists, analytics, and real-time features are intentionally outside this phase.
 
 ## Tech Stack
 
 - Backend: Java 21, Spring Boot, Spring Web, Spring Security, Spring Data JPA, Validation, PostgreSQL, Actuator
 - Frontend: React, TypeScript, Vite, Tailwind CSS, React Router
 - Database: Neon PostgreSQL over SSL; no local PostgreSQL installation required
-- Planned: JWT authentication, financial market-data provider, TanStack Query or Axios, Redis, Recharts, and Docker
+- Auth: Stateless JWT security with BCrypt password hashing
+- Planned: Financial market-data provider, TanStack Query, Redis, Recharts, and Docker
 
 ## Planned Features
 
-- User registration and JWT authentication
-- Virtual wallet with starting funds
+- User registration and JWT authentication — complete
+- Virtual wallet creation with starting funds — complete
 - Stock search and near real-time market prices
 - Simulated buy and sell orders
 - Portfolio positions and performance tracking
@@ -56,7 +59,8 @@ Required backend variables:
 | `DATABASE_USERNAME` | Neon database role |
 | `DATABASE_PASSWORD` | Neon database password |
 | `FRONTEND_URL` | Allowed browser origin |
-| `JWT_SECRET` | Reserved for a later authentication phase |
+| `JWT_SECRET` | JWT signing secret with at least 32 characters |
+| `JWT_EXPIRATION_MS` | Access token lifetime in milliseconds |
 | `FINANCIAL_API_PROVIDER` | Reserved market-data provider name |
 | `FINANCIAL_API_KEY` | Reserved provider API key |
 
@@ -66,7 +70,15 @@ PowerShell example for the current terminal:
 $env:DATABASE_URL="jdbc:postgresql://your-neon-hostname.neon.tech/your-db-name?sslmode=require"
 $env:DATABASE_USERNAME="your_neon_username"
 $env:DATABASE_PASSWORD="your_neon_password"
+$env:JWT_SECRET="replace_with_long_secure_secret_at_least_32_characters"
+$env:JWT_EXPIRATION_MS="86400000"
 $env:FRONTEND_URL="http://localhost:5173"
+```
+
+Create `frontend/.env` from `frontend/.env.example` to configure the browser API URL:
+
+```text
+VITE_API_BASE_URL=http://localhost:8080/api
 ```
 
 ## Neon PostgreSQL
@@ -101,6 +113,8 @@ Expected response:
 }
 ```
 
+Flyway automatically applies `V1__create_users_and_wallets.sql` to the configured Neon database at startup.
+
 ## Run the Frontend
 
 ```bash
@@ -111,10 +125,22 @@ npm run dev
 
 The Vite application starts at `http://localhost:5173`.
 
+Phase 1 stores the JWT in browser `localStorage` under `invest_rocket_token`. This is acceptable for the current development phase. A production-grade deployment should evaluate secure, `httpOnly`, `sameSite` cookies to reduce token exposure to browser scripts.
+
+## Authentication API
+
+| Method | Endpoint | Access |
+| --- | --- | --- |
+| `POST` | `/api/auth/register` | Public |
+| `POST` | `/api/auth/login` | Public |
+| `GET` | `/api/auth/me` | Bearer token required |
+
+Registration creates both the user and their virtual wallet in one database transaction.
+
 ## Roadmap
 
-- Phase 0: Foundation, documentation, health endpoint, and UI shell
-- Phase 1: Users, JWT authentication, and virtual wallets
+- Phase 0: Foundation, documentation, health endpoint, and UI shell — complete
+- Phase 1: Users, JWT authentication, and virtual wallets — complete
 - Phase 2: Financial API integration, search, and watchlists
 - Phase 3: Portfolio positions and simulated order execution
 - Phase 4: Trade history, performance analytics, and charts
@@ -124,7 +150,7 @@ See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 
 ## API Documentation
 
-The initial API conventions and planned resources are described in [docs/API_DESIGN.md](docs/API_DESIGN.md). Phase 0 exposes only `GET /api/health`.
+The API conventions and Phase 1 authentication contract are described in [docs/API_DESIGN.md](docs/API_DESIGN.md).
 
 ## License
 

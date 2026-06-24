@@ -6,13 +6,16 @@ Invest Rocket is an educational virtual stock trading platform. It will let user
 
 Invest Rocket does not provide financial advice, investment recommendations, brokerage services, or access to real-money trading.
 
-## Phase 0 Deliverables
+## Completed Foundation
 
 - Spring Boot backend foundation with a public health endpoint
 - React, TypeScript, Vite, and Tailwind CSS interface foundation
 - Neon PostgreSQL environment-based configuration
 - Package boundaries for future product modules
 - Architecture, API, database, and phased-delivery documentation
+- Registration and login with BCrypt and JWT security
+- Automatic virtual wallet creation
+- Protected dashboard routes and authenticated navigation
 
 ## Intended Users
 
@@ -22,7 +25,7 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 
 ## Future Capabilities
 
-Later phases will add user authentication, virtual wallets, market-data search, watchlists, simulated orders and trades, portfolio tracking, and analytics.
+Later phases will add market-data search, watchlists, simulated orders and trades, portfolio tracking, and analytics.
 
 ## Constraints
 

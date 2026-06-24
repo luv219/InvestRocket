@@ -2,40 +2,53 @@
 
 ## Platform
 
-Neon PostgreSQL is the primary development and deployment database. Developers do not need a local PostgreSQL installation.
+Neon PostgreSQL is the primary development and deployment database. A local PostgreSQL installation is not required.
 
-The backend connects with:
+The backend connects using:
 
 - `DATABASE_URL`: JDBC PostgreSQL URL containing `sslmode=require`
 - `DATABASE_USERNAME`: Neon role
 - `DATABASE_PASSWORD`: Neon password
 
-Credentials are environment variables and must never be stored in source control.
+Flyway owns schema changes. Phase 1 introduces `V1__create_users_and_wallets.sql`, while Hibernate validates the mapped schema without generating it.
 
-## Phase 0
+## Users
 
-Phase 0 deliberately defines no JPA entities, migrations, or domain tables. Hibernate schema generation is disabled.
+| Column | Type | Rules |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `full_name` | `VARCHAR(120)` | Required |
+| `email` | `VARCHAR(320)` | Required and unique |
+| `password_hash` | `VARCHAR(255)` | Required BCrypt hash |
+| `role` | `VARCHAR(20)` | `USER` or `ADMIN`; defaults to `USER` |
+| `is_enabled` | `BOOLEAN` | Defaults to `TRUE` |
+| `created_at` | `TIMESTAMPTZ` | Required UTC timestamp |
+| `updated_at` | `TIMESTAMPTZ` | Required UTC timestamp |
 
-## Planned Domain Model
+Plain-text passwords are never persisted or returned by the API.
 
-Later phases are expected to introduce:
+## Wallets
 
-- `users`: identity and account state
-- `wallets`: virtual cash balances
-- `watchlists` and `watchlist_items`: tracked symbols
-- `portfolios` and `positions`: simulated holdings
-- `orders`: simulated buy and sell requests
-- `trades`: completed simulated executions
-- `portfolio_snapshots`: historical valuation for analytics
+| Column | Type | Rules |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `user_id` | `UUID` | Unique foreign key to `users` |
+| `cash_balance` | `NUMERIC(19,2)` | Defaults to `100000.00` |
+| `initial_balance` | `NUMERIC(19,2)` | Defaults to `100000.00` |
+| `currency` | `VARCHAR(3)` | Defaults to `USD` |
+| `created_at` | `TIMESTAMPTZ` | Required UTC timestamp |
+| `updated_at` | `TIMESTAMPTZ` | Required UTC timestamp |
 
-Exact columns, constraints, indexes, money precision, and migration scripts will be designed with each owning phase. Market quotes are external data and should not be treated as durable transaction truth without an explicit snapshot strategy.
+Every successful registration creates exactly one wallet in the same transaction. Wallet balances are virtual and cannot be deposited, withdrawn, or traded for real money.
+
+## Future Tables
+
+Later phases may add watchlists, portfolios, positions, orders, trades, and portfolio snapshots. They are deliberately absent from Phase 1.
 
 ## Data Integrity Principles
 
-- Use database transactions for wallet, order, trade, and position updates.
-- Store monetary values with fixed precision rather than floating-point types.
-- Preserve immutable trade history.
-- Use UTC timestamps.
+- Use database transactions for user and wallet creation.
+- Store money with fixed-precision decimal types.
+- Normalize emails before lookup and persistence.
+- Preserve UTC timestamps.
 - Keep Redis, when introduced, as a cache rather than a source of record.
-
-All financial records represent virtual simulation activity only.
