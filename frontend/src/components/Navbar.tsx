@@ -36,6 +36,9 @@ export function Navbar() {
               <NavLink to="/orders" className={navLinkClass}>
                 Orders
               </NavLink>
+              <NavLink to="/orders/pending" className={navLinkClass}>
+                Pending Orders
+              </NavLink>
               <NavLink to="/trades" className={navLinkClass}>
                 Trades
               </NavLink>

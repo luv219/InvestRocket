@@ -61,8 +61,11 @@ public class PortfolioService {
 
         return new PortfolioSummaryResponse(
                 wallet.getCashBalance(),
+                wallet.getReservedBalance(),
+                wallet.getCashBalance().add(wallet.getReservedBalance()),
                 holdingsValue,
-                wallet.getCashBalance().add(holdingsValue).setScale(2, RoundingMode.HALF_UP),
+                wallet.getCashBalance().add(wallet.getReservedBalance()).add(holdingsValue)
+                        .setScale(2, RoundingMode.HALF_UP),
                 totalInvested,
                 unrealizedProfitLoss,
                 unrealizedPercent,
@@ -81,6 +84,8 @@ public class PortfolioService {
                 holding.getSymbol(),
                 holding.getCompanyName(),
                 holding.getQuantity(),
+                holding.getLockedQuantity(),
+                holding.getAvailableQuantity(),
                 holding.getAverageBuyPrice(),
                 quote.currentPrice(),
                 holding.getTotalInvested(),

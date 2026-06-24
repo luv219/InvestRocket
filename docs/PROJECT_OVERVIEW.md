@@ -20,6 +20,8 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 - Mock market-data provider and backend-only Finnhub integration
 - Virtual market buy and sell execution
 - Portfolio holdings, wallet valuation, order history, and trade history
+- Limit orders, stop-loss sells, pending orders, and cancellation
+- Reserved virtual cash and locked holding quantities
 
 ## Intended Users
 
@@ -31,7 +33,9 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 
 Authenticated users can search stocks, view quotes, and place virtual whole-share market buy and sell orders. Successful orders update virtual cash and holdings and create order and trade history records.
 
-Only market orders are supported at this stage. Later phases may add watchlists, advanced order types, historical snapshots, and analytics.
+Users can place market, limit, and stop-loss sell orders. Pending orders are evaluated by a scheduled processor and can be cancelled before execution. Every operation remains virtual and simulated.
+
+Later phases may add watchlists, historical snapshots, and analytics.
 
 ## Constraints
 

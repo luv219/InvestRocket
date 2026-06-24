@@ -12,3 +12,11 @@ export function formatNumber(value: number) {
 export function formatDateTime(value: string) {
   return new Date(value).toLocaleString()
 }
+
+export function formatOptionalCurrency(value: number | null) {
+  return value === null ? '—' : formatCurrency(value)
+}
+
+export function formatOptionalDateTime(value: string | null) {
+  return value === null ? '—' : formatDateTime(value)
+}

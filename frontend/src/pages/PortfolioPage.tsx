@@ -50,7 +50,9 @@ export function PortfolioPage() {
       </header>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <SummaryCard label="Cash Balance" value={formatCurrency(summary.cashBalance)} />
+        <SummaryCard label="Available Cash" value={formatCurrency(summary.availableCash)} />
+        <SummaryCard label="Reserved Cash" value={formatCurrency(summary.reservedCash)} />
+        <SummaryCard label="Total Cash" value={formatCurrency(summary.totalCash)} />
         <SummaryCard label="Holdings Value" value={formatCurrency(summary.holdingsValue)} />
         <SummaryCard label="Total Portfolio Value" value={formatCurrency(summary.totalPortfolioValue)} />
         <SummaryCard label="Total Invested" value={formatCurrency(summary.totalInvested)} />
@@ -74,7 +76,7 @@ export function PortfolioPage() {
           <table className="min-w-full divide-y divide-slate-800 text-left text-sm">
             <thead className="bg-slate-900 text-slate-400">
               <tr>
-                {['Symbol', 'Company', 'Quantity', 'Avg Buy', 'Current', 'Invested', 'Value', 'Unrealized P/L'].map((heading) => (
+                {['Symbol', 'Company', 'Total Qty', 'Locked', 'Available', 'Avg Buy', 'Current', 'Invested', 'Value', 'Unrealized P/L'].map((heading) => (
                   <th key={heading} className="px-4 py-3 font-medium">{heading}</th>
                 ))}
               </tr>
@@ -85,6 +87,8 @@ export function PortfolioPage() {
                   <td className="px-4 py-4 font-semibold text-rocket-400">{holding.symbol}</td>
                   <td className="px-4 py-4 text-white">{holding.companyName}</td>
                   <td className="px-4 py-4 text-slate-300">{holding.quantity}</td>
+                  <td className="px-4 py-4 text-amber-300">{holding.lockedQuantity}</td>
+                  <td className="px-4 py-4 text-slate-300">{holding.availableQuantity}</td>
                   <td className="px-4 py-4 text-slate-300">{formatCurrency(holding.averageBuyPrice)}</td>
                   <td className="px-4 py-4 text-slate-300">{formatCurrency(holding.currentPrice)}</td>
                   <td className="px-4 py-4 text-slate-300">{formatCurrency(holding.totalInvested)}</td>

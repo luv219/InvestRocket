@@ -45,12 +45,21 @@ public class Order {
     @Column(name = "requested_price", nullable = false, precision = 19, scale = 4)
     private BigDecimal requestedPrice;
 
-    @Column(name = "executed_price", nullable = false, precision = 19, scale = 4)
+    @Column(name = "limit_price", precision = 19, scale = 4)
+    private BigDecimal limitPrice;
+
+    @Column(name = "stop_price", precision = 19, scale = 4)
+    private BigDecimal stopPrice;
+
+    @Column(name = "executed_price", precision = 19, scale = 4)
     private BigDecimal executedPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private OrderStatus status;
+
+    @Column(name = "status_reason", length = 255)
+    private String statusReason;
 
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal totalAmount;
@@ -58,21 +67,30 @@ public class Order {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @Column(name = "executed_at", nullable = false)
+    @Column(name = "executed_at")
     private Instant executedAt;
+
+    @Column(name = "cancelled_at")
+    private Instant cancelledAt;
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
 
     protected Order() {
     }
 
-    public Order(
+    private Order(
             User user,
             String symbol,
             OrderSide side,
             OrderType orderType,
             Integer quantity,
             BigDecimal requestedPrice,
-            BigDecimal executedPrice,
-            BigDecimal totalAmount) {
+            BigDecimal limitPrice,
+            BigDecimal stopPrice,
+            BigDecimal totalAmount,
+            OrderStatus status,
+            String statusReason) {
         this.id = UUID.randomUUID();
         this.user = user;
         this.symbol = symbol;
@@ -80,10 +98,63 @@ public class Order {
         this.orderType = orderType;
         this.quantity = quantity;
         this.requestedPrice = requestedPrice;
-        this.executedPrice = executedPrice;
-        this.status = OrderStatus.EXECUTED;
+        this.limitPrice = limitPrice;
+        this.stopPrice = stopPrice;
         this.totalAmount = totalAmount;
-        this.executedAt = Instant.now();
+        this.status = status;
+        this.statusReason = statusReason;
+    }
+
+    public static Order pending(
+            User user,
+            String symbol,
+            OrderSide side,
+            OrderType orderType,
+            Integer quantity,
+            BigDecimal requestedPrice,
+            BigDecimal limitPrice,
+            BigDecimal stopPrice,
+            BigDecimal reservedOrEstimatedAmount) {
+        return new Order(
+                user,
+                symbol,
+                side,
+                orderType,
+                quantity,
+                requestedPrice,
+                limitPrice,
+                stopPrice,
+                reservedOrEstimatedAmount,
+                OrderStatus.PENDING,
+                "Waiting for trigger condition");
+    }
+
+    public static Order executed(
+            User user,
+            String symbol,
+            OrderSide side,
+            OrderType orderType,
+            Integer quantity,
+            BigDecimal requestedPrice,
+            BigDecimal limitPrice,
+            BigDecimal stopPrice,
+            BigDecimal executedPrice,
+            BigDecimal totalAmount) {
+        Order order = new Order(
+                user,
+                symbol,
+                side,
+                orderType,
+                quantity,
+                requestedPrice,
+                limitPrice,
+                stopPrice,
+                totalAmount,
+                OrderStatus.EXECUTED,
+                "Order executed");
+        order.executedPrice = executedPrice;
+        order.executedAt = Instant.now();
+        return order;
     }
 
     @PrePersist
@@ -91,6 +162,20 @@ public class Order {
         if (createdAt == null) {
             createdAt = Instant.now();
         }
+    }
+
+    public void markExecuted(BigDecimal price, BigDecimal amount) {
+        executedPrice = price;
+        totalAmount = amount;
+        status = OrderStatus.EXECUTED;
+        statusReason = "Order executed";
+        executedAt = Instant.now();
+    }
+
+    public void cancel() {
+        status = OrderStatus.CANCELLED;
+        statusReason = "Cancelled by user";
+        cancelledAt = Instant.now();
     }
 
     public UUID getId() {
@@ -121,12 +206,24 @@ public class Order {
         return requestedPrice;
     }
 
+    public BigDecimal getLimitPrice() {
+        return limitPrice;
+    }
+
+    public BigDecimal getStopPrice() {
+        return stopPrice;
+    }
+
     public BigDecimal getExecutedPrice() {
         return executedPrice;
     }
 
     public OrderStatus getStatus() {
         return status;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
     }
 
     public BigDecimal getTotalAmount() {
@@ -139,5 +236,13 @@ public class Order {
 
     public Instant getExecutedAt() {
         return executedAt;
+    }
+
+    public Instant getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public Instant getExpiresAt() {
+        return expiresAt;
     }
 }

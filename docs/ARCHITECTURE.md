@@ -71,6 +71,28 @@ The backend always selects the execution price from `MarketDataService`. It neve
 
 All executions are virtual simulations. Phase 3 supports only immediately executed whole-share market orders.
 
+## Advanced Order Flow
+
+```text
+Frontend advanced order form
+  ↓
+OrderController
+  ↓
+OrderService
+  ↓ latest backend quote
+MarketDataService
+  ↓
+Immediate execution OR pending order with reservation
+  ↓ every configured interval
+PendingOrderProcessor
+  ↓ trigger matched
+Transactional Wallet + Holding + Order + Trade update
+```
+
+The processor re-locks and re-checks each order’s status before execution, preventing duplicate trades when runs overlap. Market and trigger prices are evaluated on the backend. Pending limit buys reserve virtual cash; pending limit and stop-loss sells lock shares. Cancellation reverses the reservation.
+
+This remains simulated execution, not brokerage routing or real-money trading.
+
 ## Data and Infrastructure
 
 Neon PostgreSQL is the development and deployment database. The backend receives a JDBC URL containing `sslmode=require`, username, and password through environment variables. A local PostgreSQL installation is neither required nor assumed.

@@ -10,7 +10,7 @@ The backend connects using:
 - `DATABASE_USERNAME`: Neon role
 - `DATABASE_PASSWORD`: Neon password
 
-Flyway owns schema changes. `V1__create_users_and_wallets.sql` creates identity and wallet tables, and `V2__create_trading_tables.sql` creates the Phase 3 trading model. Hibernate validates the mapped schema without generating it.
+Flyway owns schema changes. `V3__add_advanced_order_fields.sql` adds Phase 4 reservations, locks, trigger prices, and cancellation metadata.
 
 ## Users
 
@@ -34,6 +34,7 @@ Plain-text passwords are never persisted or returned by the API.
 | `id` | `UUID` | Primary key |
 | `user_id` | `UUID` | Unique foreign key to `users` |
 | `cash_balance` | `NUMERIC(19,2)` | Defaults to `100000.00` |
+| `reserved_balance` | `NUMERIC(19,2)` | Cash reserved by pending limit buys |
 | `initial_balance` | `NUMERIC(19,2)` | Defaults to `100000.00` |
 | `currency` | `VARCHAR(3)` | Defaults to `USD` |
 | `created_at` | `TIMESTAMPTZ` | Required UTC timestamp |
@@ -52,6 +53,7 @@ One row represents one symbol held by one user.
 | `symbol` | `VARCHAR(15)` | Uppercase symbol |
 | `company_name` | `VARCHAR(255)` | Quote-time company name |
 | `quantity` | `INTEGER` | Positive whole-share quantity |
+| `locked_quantity` | `INTEGER` | Shares reserved by pending sell orders |
 | `average_buy_price` | `NUMERIC(19,4)` | Weighted average cost |
 | `total_invested` | `NUMERIC(19,2)` | Remaining cost basis |
 | `created_at`, `updated_at` | `TIMESTAMPTZ` | UTC timestamps |
@@ -67,9 +69,14 @@ One row represents one symbol held by one user.
 | `symbol`, `side`, `order_type` | Text | Market-order details |
 | `quantity` | `INTEGER` | Positive whole-share quantity |
 | `requested_price`, `executed_price` | `NUMERIC(19,4)` | Backend quote price |
+| `limit_price`, `stop_price` | `NUMERIC(19,4)` | Nullable advanced-order triggers |
 | `status` | `VARCHAR(20)` | Executed for successful Phase 3 orders |
+| `status_reason` | `VARCHAR(255)` | Human-readable lifecycle reason |
 | `total_amount` | `NUMERIC(19,2)` | Price multiplied by quantity |
 | `created_at`, `executed_at` | `TIMESTAMPTZ` | UTC timestamps |
+| `cancelled_at`, `expires_at` | `TIMESTAMPTZ` | Optional lifecycle timestamps |
+
+Pending orders allow nullable `executed_price` and `executed_at`. Status values include `PENDING`, `EXECUTED`, `REJECTED`, `CANCELLED`, and `EXPIRED`.
 
 ## Trades
 
@@ -93,6 +100,8 @@ Later phases may add watchlists and portfolio snapshots.
 
 - Use database transactions for wallet, holding, order, and trade updates.
 - Lock the user wallet and matching holding during order execution.
+- Reserve limit-buy cash and lock pending-sell quantities.
+- Release reservations on cancellation.
 - Store money with fixed-precision decimal types.
 - Normalize emails before lookup and persistence.
 - Preserve UTC timestamps.

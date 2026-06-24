@@ -33,6 +33,9 @@ public class Wallet {
     @Column(name = "cash_balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal cashBalance;
 
+    @Column(name = "reserved_balance", nullable = false, precision = 19, scale = 2)
+    private BigDecimal reservedBalance;
+
     @Column(name = "initial_balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal initialBalance;
 
@@ -52,6 +55,7 @@ public class Wallet {
         this.id = UUID.randomUUID();
         this.user = user;
         this.cashBalance = DEFAULT_BALANCE;
+        this.reservedBalance = BigDecimal.ZERO.setScale(2);
         this.initialBalance = DEFAULT_BALANCE;
         this.currency = DEFAULT_CURRENCY;
     }
@@ -84,6 +88,10 @@ public class Wallet {
         return initialBalance;
     }
 
+    public BigDecimal getReservedBalance() {
+        return reservedBalance;
+    }
+
     public String getCurrency() {
         return currency;
     }
@@ -102,5 +110,20 @@ public class Wallet {
 
     public void credit(BigDecimal amount) {
         cashBalance = cashBalance.add(amount);
+    }
+
+    public void reserve(BigDecimal amount) {
+        cashBalance = cashBalance.subtract(amount);
+        reservedBalance = reservedBalance.add(amount);
+    }
+
+    public void releaseReserved(BigDecimal amount) {
+        reservedBalance = reservedBalance.subtract(amount);
+        cashBalance = cashBalance.add(amount);
+    }
+
+    public void settleReserved(BigDecimal reservedAmount, BigDecimal executedAmount) {
+        reservedBalance = reservedBalance.subtract(reservedAmount);
+        cashBalance = cashBalance.add(reservedAmount.subtract(executedAmount));
     }
 }

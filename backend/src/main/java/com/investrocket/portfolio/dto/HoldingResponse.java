@@ -6,6 +6,8 @@ public record HoldingResponse(
         String symbol,
         String companyName,
         Integer quantity,
+        Integer lockedQuantity,
+        Integer availableQuantity,
         BigDecimal averageBuyPrice,
         BigDecimal currentPrice,
         BigDecimal totalInvested,

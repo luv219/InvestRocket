@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { SummaryCard } from '../components/SummaryCard'
 import { useAuth } from '../features/auth/useAuth'
+import { getPendingOrders } from '../features/orders/orderService'
 import { getPortfolioSummary } from '../features/portfolio/portfolioService'
 import type { PortfolioSummary } from '../types/portfolio'
 import { getApiErrorMessage } from '../utils/apiError'
@@ -12,17 +13,22 @@ const quickLinks = [
   { to: '/market', label: 'Explore Market', description: 'Search stocks and place virtual market orders.' },
   { to: '/portfolio', label: 'View Portfolio', description: 'Review holdings and current valuation.' },
   { to: '/orders', label: 'Orders', description: 'Inspect your simulated order history.' },
+  { to: '/orders/pending', label: 'Pending Orders', description: 'Review or cancel advanced orders awaiting triggers.' },
   { to: '/trades', label: 'Trades', description: 'Review executions and realized profit or loss.' },
 ]
 
 export function DashboardPage() {
   const { user, logout } = useAuth()
   const [summary, setSummary] = useState<PortfolioSummary | null>(null)
+  const [pendingCount, setPendingCount] = useState<number | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    getPortfolioSummary()
-      .then(setSummary)
+    Promise.all([getPortfolioSummary(), getPendingOrders()])
+      .then(([summaryData, pendingOrders]) => {
+        setSummary(summaryData)
+        setPendingCount(pendingOrders.length)
+      })
       .catch((requestError) => setError(getApiErrorMessage(requestError, 'Unable to load portfolio summary')))
   }, [])
 
@@ -41,11 +47,12 @@ export function DashboardPage() {
 
       {error && <p className="mt-6 text-sm text-red-300">{error}</p>}
 
-      <section className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard label="Cash Balance" value={summary ? formatCurrency(summary.cashBalance) : error ? 'Unavailable' : 'Loading...'} />
+      <section className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        <SummaryCard label="Available Cash" value={summary ? formatCurrency(summary.availableCash) : error ? 'Unavailable' : 'Loading...'} />
         <SummaryCard label="Holdings Value" value={summary ? formatCurrency(summary.holdingsValue) : error ? 'Unavailable' : 'Loading...'} />
         <SummaryCard label="Total Portfolio Value" value={summary ? formatCurrency(summary.totalPortfolioValue) : error ? 'Unavailable' : 'Loading...'} />
         <SummaryCard label="Number of Holdings" value={summary ? formatNumber(summary.numberOfHoldings) : error ? 'Unavailable' : 'Loading...'} />
+        <SummaryCard label="Pending Orders" value={pendingCount !== null ? formatNumber(pendingCount) : error ? 'Unavailable' : 'Loading...'} />
       </section>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2">

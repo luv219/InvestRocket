@@ -43,14 +43,24 @@ Watchlists remain deferred.
 
 Status: complete. Phase 3 supports whole-share `MARKET` orders only, weighted-average holdings, realized sell profit or loss, portfolio valuation, and order/trade history.
 
-## Phase 4 — Analytics
+## Phase 4 — Advanced Order Types
 
-- Portfolio valuation and returns
+- Limit buy and sell orders
+- Stop-loss sell orders
+- Pending lifecycle and cancellation
+- Reserved cash and locked share quantities
+- Scheduled trigger processing
+
+Status: complete.
+
+## Phase 5 — Analytics
+
+- Portfolio valuation history and returns
 - Performance history
 - Recharts visualizations
-- Dashboard summaries
+- Dashboard analytics
 
-## Phase 5 — Hardening and Delivery
+## Phase 6 — Hardening and Delivery
 
 - Redis quote caching
 - Docker support

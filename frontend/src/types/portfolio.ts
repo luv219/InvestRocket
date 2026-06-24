@@ -2,6 +2,8 @@ export type Holding = {
   symbol: string
   companyName: string
   quantity: number
+  lockedQuantity: number
+  availableQuantity: number
   averageBuyPrice: number
   currentPrice: number
   totalInvested: number
@@ -11,7 +13,9 @@ export type Holding = {
 }
 
 export type PortfolioSummary = {
-  cashBalance: number
+  availableCash: number
+  reservedCash: number
+  totalCash: number
   holdingsValue: number
   totalPortfolioValue: number
   totalInvested: number

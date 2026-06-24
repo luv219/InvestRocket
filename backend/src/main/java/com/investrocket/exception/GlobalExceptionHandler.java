@@ -139,10 +139,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             InsufficientFundsException.class,
             InsufficientHoldingsException.class,
-            UnsupportedOrderTypeException.class
+            UnsupportedOrderTypeException.class,
+            InvalidOrderRequestException.class,
+            OrderCancellationException.class
     })
     public ResponseEntity<ErrorResponse> handleTradingRequest(RuntimeException exception) {
         return ResponseEntity.badRequest().body(new ErrorResponse(
+                false,
+                exception.getMessage(),
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
                 false,
                 exception.getMessage(),
                 Map.of(),

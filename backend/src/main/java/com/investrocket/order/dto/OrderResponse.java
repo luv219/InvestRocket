@@ -15,12 +15,16 @@ public record OrderResponse(
         OrderSide side,
         OrderType orderType,
         Integer quantity,
+        BigDecimal limitPrice,
+        BigDecimal stopPrice,
         BigDecimal requestedPrice,
         BigDecimal executedPrice,
         OrderStatus status,
+        String statusReason,
         BigDecimal totalAmount,
         Instant createdAt,
         Instant executedAt,
+        Instant cancelledAt,
         String message) {
 
     public static OrderResponse from(Order order, String message) {
@@ -30,12 +34,16 @@ public record OrderResponse(
                 order.getSide(),
                 order.getOrderType(),
                 order.getQuantity(),
+                order.getLimitPrice(),
+                order.getStopPrice(),
                 order.getRequestedPrice(),
                 order.getExecutedPrice(),
                 order.getStatus(),
+                order.getStatusReason(),
                 order.getTotalAmount(),
                 order.getCreatedAt(),
                 order.getExecutedAt(),
+                order.getCancelledAt(),
                 message);
     }
 }

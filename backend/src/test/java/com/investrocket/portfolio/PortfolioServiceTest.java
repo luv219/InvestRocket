@@ -36,7 +36,9 @@ class PortfolioServiceTest {
         User user = new User("Demo User", "demo@example.com", "hashed-password");
         Wallet wallet = new Wallet(user);
         wallet.debit(new BigDecimal("200.00"));
+        wallet.reserve(new BigDecimal("300.00"));
         Holding holding = new Holding(user, "AAPL", "Apple Inc.", 2, new BigDecimal("100.00"));
+        holding.lock(1);
 
         when(walletRepository.findByUser(user)).thenReturn(Optional.of(wallet));
         when(holdingRepository.findByUser(user)).thenReturn(List.of(holding));
@@ -57,7 +59,11 @@ class PortfolioServiceTest {
         assertThat(holdings.getFirst().currentValue()).isEqualByComparingTo("240.00");
         assertThat(holdings.getFirst().unrealizedProfitLoss()).isEqualByComparingTo("40.00");
         assertThat(holdings.getFirst().unrealizedProfitLossPercent()).isEqualByComparingTo("20.00");
-        assertThat(summary.cashBalance()).isEqualByComparingTo("99800.00");
+        assertThat(holdings.getFirst().lockedQuantity()).isEqualTo(1);
+        assertThat(holdings.getFirst().availableQuantity()).isEqualTo(1);
+        assertThat(summary.availableCash()).isEqualByComparingTo("99500.00");
+        assertThat(summary.reservedCash()).isEqualByComparingTo("300.00");
+        assertThat(summary.totalCash()).isEqualByComparingTo("99800.00");
         assertThat(summary.holdingsValue()).isEqualByComparingTo("240.00");
         assertThat(summary.totalPortfolioValue()).isEqualByComparingTo("100040.00");
         assertThat(summary.numberOfHoldings()).isEqualTo(1);

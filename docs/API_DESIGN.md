@@ -141,7 +141,7 @@ Provider rate limits return `429 Too Many Requests`, missing Finnhub configurati
 
 ### `POST /api/orders`
 
-Requires a valid Bearer JWT. The backend ignores any client-side price estimate and fetches the current quote before execution.
+Requires a valid Bearer JWT. The backend ignores any client-side execution estimate and fetches the current quote before deciding between immediate execution and pending creation.
 
 ```json
 {
@@ -174,11 +174,59 @@ Requires a valid Bearer JWT. The backend ignores any client-side price estimate 
 }
 ```
 
-Only `MARKET` is accepted in Phase 3. Insufficient virtual cash or holdings returns `400 Bad Request`.
+`MARKET`, `LIMIT`, and sell-side `STOP_LOSS` requests are accepted in Phase 4. Insufficient available virtual cash or holdings returns `400 Bad Request`.
+
+Phase 4 request examples:
+
+Limit buy:
+
+```json
+{
+  "symbol": "AAPL",
+  "side": "BUY",
+  "orderType": "LIMIT",
+  "quantity": 1,
+  "limitPrice": 180.00
+}
+```
+
+Limit sell:
+
+```json
+{
+  "symbol": "AAPL",
+  "side": "SELL",
+  "orderType": "LIMIT",
+  "quantity": 1,
+  "limitPrice": 220.00
+}
+```
+
+Stop-loss sell:
+
+```json
+{
+  "symbol": "AAPL",
+  "side": "SELL",
+  "orderType": "STOP_LOSS",
+  "quantity": 1,
+  "stopPrice": 170.00
+}
+```
+
+Stop-loss buys are rejected. A pending response contains `status: "PENDING"`, nullable execution fields, the trigger price, and a waiting status reason.
 
 ### `GET /api/orders`
 
 Returns only the authenticated user’s orders in newest-first order.
+
+### `GET /api/orders/pending`
+
+Returns only the authenticated user’s pending orders.
+
+### `DELETE /api/orders/{orderId}/cancel`
+
+Cancels an owned pending order. Reserved cash or locked shares are released in the same transaction. Executed, cancelled, expired, or another user’s orders cannot be cancelled.
 
 ### `GET /api/trades`
 
@@ -195,7 +243,9 @@ Returns the authenticated user’s holdings with current quote, cost basis, curr
   "success": true,
   "message": "Portfolio summary retrieved successfully",
   "data": {
-    "cashBalance": 99804.75,
+    "availableCash": 99624.75,
+    "reservedCash": 180.00,
+    "totalCash": 99804.75,
     "holdingsValue": 195.25,
     "totalPortfolioValue": 100000.00,
     "totalInvested": 195.25,

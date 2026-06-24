@@ -1,5 +1,7 @@
 package com.investrocket.order.dto;
 
+import java.math.BigDecimal;
+
 import com.investrocket.order.OrderSide;
 import com.investrocket.order.OrderType;
 
@@ -19,5 +21,9 @@ public record CreateOrderRequest(
 
         @NotNull(message = "Quantity is required")
         @Min(value = 1, message = "Quantity must be greater than 0")
-        Integer quantity) {
+        Integer quantity,
+
+        BigDecimal limitPrice,
+
+        BigDecimal stopPrice) {
 }

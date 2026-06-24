@@ -4,11 +4,11 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 3 Status
+## Phase 4 Status
 
-Phase 3 adds a transactional virtual trading engine for market buy and sell orders. Users can spend virtual wallet cash, maintain holdings with weighted-average cost, view portfolio valuation, and review order and trade history.
+Phase 4 adds advanced simulated order types: limit buys, limit sells, and stop-loss sells. Orders execute immediately when their trigger already matches or remain pending for the scheduled processor.
 
-Only immediately executed `MARKET` orders are supported. Limit orders, stop-loss orders, watchlists, charts, caching, and streaming prices remain outside this phase.
+Pending limit buys reserve virtual cash, while pending limit and stop-loss sells lock owned shares. Cancellation releases those reservations. Partial fills, real-time pushes, and brokerage execution remain outside this phase.
 
 ## Tech Stack
 
@@ -18,6 +18,7 @@ Only immediately executed `MARKET` orders are supported. Limit orders, stop-loss
 - Auth: Stateless JWT security with BCrypt password hashing
 - Market data: Provider abstraction with mock and Finnhub implementations
 - Trading: Transactional simulated market orders, holdings, orders, and trades
+- Advanced orders: Pending lifecycle, reservation, cancellation, and scheduled triggers
 - Planned: TanStack Query, Redis, Recharts, and Docker
 
 ## Planned Features
@@ -26,6 +27,9 @@ Only immediately executed `MARKET` orders are supported. Limit orders, stop-loss
 - Virtual wallet creation with starting funds — complete
 - Stock search and on-demand market quotes — complete
 - Simulated market buy and sell orders — complete
+- Limit buy and sell orders — complete
+- Stop-loss sell orders — complete
+- Pending order cancellation and processing — complete
 - Portfolio holdings and valuation — complete
 - Order and trade history — complete
 - Watchlists and analytics dashboards
@@ -66,6 +70,8 @@ Required backend variables:
 | `JWT_EXPIRATION_MS` | Access token lifetime in milliseconds |
 | `FINANCIAL_API_PROVIDER` | `mock` by default, or `finnhub` |
 | `FINANCIAL_API_KEY` | Required only for the Finnhub provider |
+| `PENDING_ORDER_PROCESSOR_ENABLED` | Enables scheduled pending-order checks |
+| `PENDING_ORDER_PROCESSOR_INTERVAL_MS` | Delay between checks; defaults to `30000` |
 
 PowerShell example for the current terminal:
 
@@ -77,6 +83,8 @@ $env:JWT_SECRET="replace_with_long_secure_secret_at_least_32_characters"
 $env:JWT_EXPIRATION_MS="86400000"
 $env:FRONTEND_URL="http://localhost:5173"
 $env:FINANCIAL_API_PROVIDER="mock"
+$env:PENDING_ORDER_PROCESSOR_ENABLED="true"
+$env:PENDING_ORDER_PROCESSOR_INTERVAL_MS="30000"
 ```
 
 Create `frontend/.env` from `frontend/.env.example` to configure the browser API URL:
@@ -165,13 +173,21 @@ All trading endpoints require `Authorization: Bearer <accessToken>`.
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/orders` | Execute a virtual market buy or sell |
+| `POST` | `/api/orders` | Submit a market, limit, or stop-loss sell order |
 | `GET` | `/api/orders` | Current user’s order history |
+| `GET` | `/api/orders/pending` | Current user’s pending orders |
+| `DELETE` | `/api/orders/{orderId}/cancel` | Cancel one owned pending order |
 | `GET` | `/api/trades` | Current user’s trade history |
 | `GET` | `/api/portfolio/holdings` | Current holdings with market valuation |
 | `GET` | `/api/portfolio/summary` | Wallet and portfolio summary |
 
-The frontend never sends an execution price. The backend fetches the active provider quote, validates virtual cash or holdings, and updates wallet, holding, order, and trade records in one transaction.
+The frontend never sends an execution price. The backend fetches the active provider quote and either executes immediately or creates a pending order.
+
+- Pending limit buys move `limitPrice × quantity` from available cash to reserved cash.
+- Pending limit and stop-loss sells move shares from available quantity to locked quantity.
+- Execution settles the reservation transactionally and creates one trade.
+- Cancellation returns reserved cash or unlocks shares.
+- The scheduled processor checks pending triggers every 30 seconds by default.
 
 Example request:
 
@@ -184,11 +200,23 @@ Example request:
 }
 ```
 
+Limit buy example:
+
+```json
+{
+  "symbol": "AAPL",
+  "side": "BUY",
+  "orderType": "LIMIT",
+  "quantity": 1,
+  "limitPrice": 180.00
+}
+```
+
 ## Development Commit
 
 ```bash
 git add .
-git commit -m "feat: implement phase 3 trading engine MVP"
+git commit -m "feat: implement phase 4 advanced order types"
 ```
 
 ## Roadmap
@@ -197,15 +225,16 @@ git commit -m "feat: implement phase 3 trading engine MVP"
 - Phase 1: Users, JWT authentication, and virtual wallets — complete
 - Phase 2: Market-data provider foundation, stock search, and quotes — complete
 - Phase 3: Transactional market orders, holdings, portfolio, orders, and trades — complete
+- Phase 4: Limit orders, stop-loss sells, pending processing, and cancellation — complete
 - Future: Watchlists
-- Phase 4: Trade history, performance analytics, and charts
-- Phase 5: Redis caching, Docker support, testing, and deployment hardening
+- Phase 5: Portfolio performance analytics and charts
+- Phase 6: Redis caching, Docker support, testing, and deployment hardening
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 
 ## API Documentation
 
-The API conventions and Phase 1 authentication contract are described in [docs/API_DESIGN.md](docs/API_DESIGN.md).
+The API conventions and authentication, market-data, and advanced-order contracts are described in [docs/API_DESIGN.md](docs/API_DESIGN.md).
 
 ## License
 

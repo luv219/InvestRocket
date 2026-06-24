@@ -7,6 +7,7 @@ import { LoginPage } from '../pages/LoginPage'
 import { MarketPage } from '../pages/MarketPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { OrdersPage } from '../pages/OrdersPage'
+import { PendingOrdersPage } from '../pages/PendingOrdersPage'
 import { PortfolioPage } from '../pages/PortfolioPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { StockDetailPage } from '../pages/StockDetailPage'
@@ -26,6 +27,7 @@ export function AppRoutes() {
           <Route path="market/:symbol" element={<StockDetailPage />} />
           <Route path="portfolio" element={<PortfolioPage />} />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="orders/pending" element={<PendingOrdersPage />} />
           <Route path="trades" element={<TradesPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />

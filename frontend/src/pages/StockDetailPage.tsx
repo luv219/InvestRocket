@@ -6,13 +6,11 @@ import { getMarketErrorMessage } from '../features/market/marketErrors'
 import { getQuote } from '../features/market/marketService'
 import { placeOrder } from '../features/orders/orderService'
 import type { StockQuote } from '../types/market'
-import type { Order, OrderSide } from '../types/order'
+import type { Order, OrderSide, OrderType } from '../types/order'
 import { getApiErrorMessage } from '../utils/apiError'
 
 function formatMoney(value: number | null, currency: string | null) {
-  if (value === null) {
-    return 'Unavailable'
-  }
+  if (value === null) return 'Unavailable'
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency ?? 'USD',
@@ -20,15 +18,14 @@ function formatMoney(value: number | null, currency: string | null) {
 }
 
 function formatNumber(value: number | null) {
-  return value === null ? 'Unavailable' : new Intl.NumberFormat('en-US').format(value)
+  return value === null
+    ? 'Unavailable'
+    : new Intl.NumberFormat('en-US').format(value)
 }
 
 function formatChange(value: number | null, suffix = '') {
-  if (value === null) {
-    return 'Unavailable'
-  }
-  const prefix = value >= 0 ? '+' : ''
-  return `${prefix}${formatNumber(value)}${suffix}`
+  if (value === null) return 'Unavailable'
+  return `${value >= 0 ? '+' : ''}${formatNumber(value)}${suffix}`
 }
 
 export function StockDetailPage() {
@@ -37,10 +34,13 @@ export function StockDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [side, setSide] = useState<OrderSide>('BUY')
+  const [orderType, setOrderType] = useState<OrderType>('MARKET')
   const [quantity, setQuantity] = useState(1)
+  const [limitPrice, setLimitPrice] = useState('')
+  const [stopPrice, setStopPrice] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderError, setOrderError] = useState('')
-  const [executedOrder, setExecutedOrder] = useState<Order | null>(null)
+  const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null)
 
   useEffect(() => {
     async function loadQuote() {
@@ -54,9 +54,14 @@ export function StockDetailPage() {
         setIsLoading(false)
       }
     }
-
     void loadQuote()
   }, [symbol])
+
+  function handleOrderTypeChange(type: OrderType) {
+    setOrderType(type)
+    setOrderError('')
+    if (type === 'STOP_LOSS') setSide('SELL')
+  }
 
   async function handleOrderSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -64,20 +69,37 @@ export function StockDetailPage() {
       setOrderError('Quantity must be greater than 0')
       return
     }
+    if (orderType === 'LIMIT' && Number(limitPrice) <= 0) {
+      setOrderError('Limit price must be greater than 0')
+      return
+    }
+    if (orderType === 'STOP_LOSS' && Number(stopPrice) <= 0) {
+      setOrderError('Stop price must be greater than 0')
+      return
+    }
 
     setOrderError('')
-    setExecutedOrder(null)
+    setSubmittedOrder(null)
     setIsSubmitting(true)
     try {
-      const order = await placeOrder({
-        symbol: quote.symbol,
-        side,
-        orderType: 'MARKET',
-        quantity,
-      })
-      setExecutedOrder(order)
+      setSubmittedOrder(
+        await placeOrder({
+          symbol: quote.symbol,
+          side,
+          orderType,
+          quantity,
+          ...(orderType === 'LIMIT'
+            ? { limitPrice: Number(limitPrice) }
+            : {}),
+          ...(orderType === 'STOP_LOSS'
+            ? { stopPrice: Number(stopPrice) }
+            : {}),
+        }),
+      )
     } catch (requestError) {
-      setOrderError(getApiErrorMessage(requestError, 'Unable to place market order'))
+      setOrderError(
+        getApiErrorMessage(requestError, 'Unable to place advanced order'),
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -108,12 +130,25 @@ export function StockDetailPage() {
     )
   }
 
-  const isPositive = (quote.changeAmount ?? 0) >= 0
-  const changeClass = isPositive ? 'text-rocket-400' : 'text-red-400'
+  const referencePrice =
+    orderType === 'LIMIT'
+      ? Number(limitPrice) || 0
+      : orderType === 'STOP_LOSS'
+        ? Number(stopPrice) || 0
+        : quote.currentPrice
+  const buttonLabel =
+    orderType === 'MARKET'
+      ? 'Place Market Order'
+      : orderType === 'LIMIT'
+        ? 'Place Limit Order'
+        : 'Place Stop-Loss Order'
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
-      <Link to="/market" className="text-sm font-medium text-slate-400 hover:text-white">
+      <Link
+        to="/market"
+        className="text-sm font-medium text-slate-400 hover:text-white"
+      >
         ← Back to market search
       </Link>
 
@@ -133,8 +168,15 @@ export function StockDetailPage() {
           <p className="text-4xl font-bold text-white">
             {formatMoney(quote.currentPrice, quote.currency)}
           </p>
-          <p className={`mt-2 font-semibold ${changeClass}`}>
-            {formatChange(quote.changeAmount)} ({formatChange(quote.changePercent, '%')})
+          <p
+            className={`mt-2 font-semibold ${
+              (quote.changeAmount ?? 0) >= 0
+                ? 'text-rocket-400'
+                : 'text-red-400'
+            }`}
+          >
+            {formatChange(quote.changeAmount)} (
+            {formatChange(quote.changePercent, '%')})
           </p>
         </div>
       </section>
@@ -161,35 +203,61 @@ export function StockDetailPage() {
           label="Latest trading time"
           value={new Date(quote.latestTradingTime).toLocaleString()}
         />
-        <MarketStatCard label="Currency" value={quote.currency ?? 'Unavailable'} />
+        <MarketStatCard
+          label="Currency"
+          value={quote.currency ?? 'Unavailable'}
+        />
         <MarketStatCard label="Provider" value={quote.provider} />
       </section>
 
       <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rocket-400">
-            Market order
-          </p>
-          <h2 className="mt-2 text-2xl font-bold text-white">Place a virtual trade</h2>
-          <p className="mt-2 text-sm text-amber-200">
-            This is a virtual market order using simulated funds.
-          </p>
-        </div>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rocket-400">
+          Advanced virtual order
+        </p>
+        <h2 className="mt-2 text-2xl font-bold text-white">Place an order</h2>
+        <p className="mt-2 text-sm text-amber-200">
+          All orders use simulated funds. Pending orders are checked
+          periodically.
+        </p>
 
-        <form onSubmit={handleOrderSubmit} className="mt-6 grid gap-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
+        <form
+          onSubmit={handleOrderSubmit}
+          className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
           <label>
             <span className="text-sm font-medium text-slate-300">Side</span>
             <select
               value={side}
-              onChange={(event) => setSide(event.target.value as OrderSide)}
-              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-rocket-500"
+              disabled={orderType === 'STOP_LOSS'}
+              onChange={(event) =>
+                setSide(event.target.value as OrderSide)
+              }
+              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white disabled:opacity-60"
             >
               <option value="BUY">BUY</option>
               <option value="SELL">SELL</option>
             </select>
           </label>
           <label>
-            <span className="text-sm font-medium text-slate-300">Quantity</span>
+            <span className="text-sm font-medium text-slate-300">
+              Order type
+            </span>
+            <select
+              value={orderType}
+              onChange={(event) =>
+                handleOrderTypeChange(event.target.value as OrderType)
+              }
+              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+            >
+              <option value="MARKET">MARKET</option>
+              <option value="LIMIT">LIMIT</option>
+              <option value="STOP_LOSS">STOP LOSS (SELL)</option>
+            </select>
+          </label>
+          <label>
+            <span className="text-sm font-medium text-slate-300">
+              Quantity
+            </span>
             <input
               type="number"
               min={1}
@@ -197,46 +265,95 @@ export function StockDetailPage() {
               required
               value={quantity}
               onChange={(event) => setQuantity(Number(event.target.value))}
-              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-rocket-500"
+              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
             />
           </label>
+
+          {orderType === 'LIMIT' && (
+            <label>
+              <span className="text-sm font-medium text-slate-300">
+                Limit price
+              </span>
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                required
+                value={limitPrice}
+                onChange={(event) => setLimitPrice(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+              />
+            </label>
+          )}
+
+          {orderType === 'STOP_LOSS' && (
+            <label>
+              <span className="text-sm font-medium text-slate-300">
+                Stop price
+              </span>
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                required
+                value={stopPrice}
+                onChange={(event) => setStopPrice(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+              />
+            </label>
+          )}
+
           <div>
-            <p className="text-sm font-medium text-slate-300">Estimated total</p>
+            <p className="text-sm font-medium text-slate-300">
+              Estimated total
+            </p>
             <p className="mt-2 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 font-semibold text-white">
-              {formatMoney(quote.currentPrice * Math.max(quantity, 0), quote.currency)}
+              {formatMoney(
+                referencePrice * Math.max(quantity, 0),
+                quote.currency,
+              )}
             </p>
           </div>
+
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`rounded-xl px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
-              side === 'BUY'
-                ? 'bg-rocket-500 text-slate-950 hover:bg-rocket-400'
-                : 'bg-red-500 text-white hover:bg-red-400'
-            }`}
+            className="self-end rounded-xl bg-rocket-500 px-6 py-3 font-semibold text-slate-950 hover:bg-rocket-400 disabled:opacity-60"
           >
-            {isSubmitting ? 'Executing...' : `${side} MARKET`}
+            {isSubmitting ? 'Submitting...' : buttonLabel}
           </button>
         </form>
 
         {orderError && (
-          <p role="alert" className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <p
+            role="alert"
+            className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+          >
             {orderError}
           </p>
         )}
 
-        {executedOrder && (
+        {submittedOrder && (
           <div className="mt-5 rounded-xl border border-rocket-500/30 bg-rocket-500/10 px-5 py-4">
-            <p className="font-semibold text-rocket-300">{executedOrder.message}</p>
+            <p className="font-semibold text-rocket-300">
+              {submittedOrder.status === 'PENDING'
+                ? 'Order accepted and pending its trigger.'
+                : submittedOrder.message}
+            </p>
             <p className="mt-1 text-sm text-slate-300">
-              {executedOrder.quantity} {executedOrder.symbol} at{' '}
-              {formatMoney(executedOrder.executedPrice, quote.currency)} for{' '}
-              {formatMoney(executedOrder.totalAmount, quote.currency)}.
+              Status: {submittedOrder.status}. Quantity:{' '}
+              {submittedOrder.quantity} {submittedOrder.symbol}.
             </p>
             <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
-              <Link to="/portfolio" className="text-rocket-400 hover:text-rocket-300">View Portfolio</Link>
-              <Link to="/orders" className="text-rocket-400 hover:text-rocket-300">View Orders</Link>
-              <Link to="/trades" className="text-rocket-400 hover:text-rocket-300">View Trades</Link>
+              <Link to="/orders/pending" className="text-rocket-400">
+                Pending Orders
+              </Link>
+              <Link to="/orders" className="text-rocket-400">
+                All Orders
+              </Link>
+              <Link to="/portfolio" className="text-rocket-400">
+                Portfolio
+              </Link>
             </div>
           </div>
         )}

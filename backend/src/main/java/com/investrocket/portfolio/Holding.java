@@ -42,6 +42,9 @@ public class Holding {
     @Column(nullable = false)
     private Integer quantity;
 
+    @Column(name = "locked_quantity", nullable = false)
+    private Integer lockedQuantity;
+
     @Column(name = "average_buy_price", nullable = false, precision = 19, scale = 4)
     private BigDecimal averageBuyPrice;
 
@@ -68,6 +71,7 @@ public class Holding {
         this.symbol = symbol;
         this.companyName = companyName;
         this.quantity = quantity;
+        this.lockedQuantity = 0;
         this.averageBuyPrice = buyPrice;
         this.totalInvested = buyPrice.multiply(BigDecimal.valueOf(quantity))
                 .setScale(2, RoundingMode.HALF_UP);
@@ -102,6 +106,21 @@ public class Holding {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
+    public void lock(Integer quantityToLock) {
+        lockedQuantity += quantityToLock;
+    }
+
+    public void unlock(Integer quantityToUnlock) {
+        lockedQuantity -= quantityToUnlock;
+    }
+
+    public void executeLockedSale(Integer soldQuantity) {
+        quantity -= soldQuantity;
+        lockedQuantity -= soldQuantity;
+        totalInvested = averageBuyPrice.multiply(BigDecimal.valueOf(quantity))
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
     public UUID getId() {
         return id;
     }
@@ -120,6 +139,14 @@ public class Holding {
 
     public Integer getQuantity() {
         return quantity;
+    }
+
+    public Integer getLockedQuantity() {
+        return lockedQuantity;
+    }
+
+    public Integer getAvailableQuantity() {
+        return quantity - lockedQuantity;
     }
 
     public BigDecimal getAverageBuyPrice() {
