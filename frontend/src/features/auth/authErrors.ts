@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import type { ApiErrorResponse } from '../../types/auth'
+import type { ApiErrorResponse } from '../../types/api'
 
 export function getAuthErrorMessage(error: unknown) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {

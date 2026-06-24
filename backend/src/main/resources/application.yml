@@ -28,8 +28,9 @@ app:
     secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   financial-api:
-    provider: ${FINANCIAL_API_PROVIDER:finnhub}
+    provider: ${FINANCIAL_API_PROVIDER:mock}
     api-key: ${FINANCIAL_API_KEY:}
+    finnhub-base-url: ${FINNHUB_BASE_URL:https://finnhub.io/api/v1}
 
 management:
   endpoints:

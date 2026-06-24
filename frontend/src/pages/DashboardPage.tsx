@@ -1,10 +1,12 @@
+import { Link } from 'react-router-dom'
+
 import { useAuth } from '../features/auth/useAuth'
 
 const placeholders = [
   { label: 'Virtual Balance', value: 'Coming in next phase' },
   { label: 'Portfolio Value', value: 'Coming in next phase' },
   { label: 'Orders', value: 'Coming in next phase' },
-  { label: 'Market Data', value: 'Coming in next phase' },
+  { label: 'Market Data', value: 'Search and quotes available' },
 ]
 
 export function DashboardPage() {
@@ -42,6 +44,22 @@ export function DashboardPage() {
           </article>
         ))}
       </section>
+
+      <Link
+        to="/market"
+        className="mt-8 flex items-center justify-between rounded-2xl border border-rocket-500/30 bg-rocket-500/10 p-6 hover:-translate-y-0.5 hover:border-rocket-400"
+      >
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rocket-400">
+            Market data
+          </p>
+          <h2 className="mt-2 text-2xl font-bold text-white">Explore Market</h2>
+          <p className="mt-2 text-slate-400">
+            Search supported stocks and inspect the latest available quote.
+          </p>
+        </div>
+        <span className="text-2xl text-rocket-400">→</span>
+      </Link>
 
       <p className="mt-8 rounded-xl border border-amber-400/20 bg-amber-400/5 px-5 py-4 text-sm text-amber-200">
         Invest Rocket uses virtual funds only and does not provide financial

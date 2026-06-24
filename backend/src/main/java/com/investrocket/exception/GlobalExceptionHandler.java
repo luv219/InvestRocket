@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -66,6 +67,60 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(
                 false,
                 "Access denied",
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler({
+            InvalidMarketDataRequestException.class,
+            MissingServletRequestParameterException.class
+    })
+    public ResponseEntity<ErrorResponse> handleInvalidMarketDataRequest(Exception exception) {
+        String message = exception instanceof MissingServletRequestParameterException
+                ? "Search query is required"
+                : exception.getMessage();
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+                false,
+                message,
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler(StockNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleStockNotFound(StockNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+                false,
+                exception.getMessage(),
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler(MarketDataRateLimitException.class)
+    public ResponseEntity<ErrorResponse> handleMarketDataRateLimit(
+            MarketDataRateLimitException exception) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new ErrorResponse(
+                false,
+                exception.getMessage(),
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler(MarketDataConfigurationException.class)
+    public ResponseEntity<ErrorResponse> handleMarketDataConfiguration(
+            MarketDataConfigurationException exception) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ErrorResponse(
+                false,
+                exception.getMessage(),
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler(MarketDataProviderException.class)
+    public ResponseEntity<ErrorResponse> handleMarketDataProvider(
+            MarketDataProviderException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(
+                false,
+                "Unable to fetch market data",
                 Map.of(),
                 Instant.now()));
     }

@@ -4,8 +4,10 @@ import { AppLayout } from '../layouts/AppLayout'
 import { DashboardPage } from '../pages/DashboardPage'
 import { LandingPage } from '../pages/LandingPage'
 import { LoginPage } from '../pages/LoginPage'
+import { MarketPage } from '../pages/MarketPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { RegisterPage } from '../pages/RegisterPage'
+import { StockDetailPage } from '../pages/StockDetailPage'
 import { ProtectedRoute } from './ProtectedRoute'
 
 export function AppRoutes() {
@@ -17,6 +19,8 @@ export function AppRoutes() {
         <Route path="register" element={<RegisterPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="market" element={<MarketPage />} />
+          <Route path="market/:symbol" element={<StockDetailPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

@@ -16,6 +16,8 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 - Registration and login with BCrypt and JWT security
 - Automatic virtual wallet creation
 - Protected dashboard routes and authenticated navigation
+- Authenticated stock search and quote pages
+- Mock market-data provider and backend-only Finnhub integration
 
 ## Intended Users
 
@@ -25,7 +27,9 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 
 ## Future Capabilities
 
-Later phases will add market-data search, watchlists, simulated orders and trades, portfolio tracking, and analytics.
+Authenticated users can now search stocks and view on-demand quotes. Buy and sell buttons are placeholders only and do not change wallet balances or create trades.
+
+Later phases will add watchlists, simulated orders and trades, portfolio tracking, and analytics.
 
 ## Constraints
 

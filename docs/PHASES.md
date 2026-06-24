@@ -26,8 +26,13 @@ Status: complete. JWTs are stored in `localStorage` for development; production 
 
 - Financial API provider abstraction
 - Stock symbol search and quote retrieval
-- Watchlists
 - Rate-limit handling and resilient API errors
+- Protected market and stock-detail pages
+- Disabled buy and sell placeholders
+
+Status: complete. The mock provider is the default; Finnhub can be selected with backend environment variables.
+
+Watchlists remain deferred.
 
 ## Phase 3 — Simulated Trading
 

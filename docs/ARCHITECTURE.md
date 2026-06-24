@@ -11,7 +11,7 @@ React + TypeScript frontend
   ▼
 Spring Boot backend
   ├── Neon PostgreSQL
-  ├── Financial data provider (later)
+  ├── Mock or Finnhub market-data provider
   └── Redis cache (later)
 ```
 
@@ -27,12 +27,29 @@ Invest Rocket is a simulator. No component will connect to a brokerage or execut
 ## Backend Modules
 
 - `auth`, `user`, `wallet`: identity and virtual funding in Phase 1
-- `marketdata`, `watchlist`: provider abstraction and user tracking in Phase 2
+- `marketdata`: provider abstraction, search, and quote retrieval in Phase 2
+- `watchlist`: reserved for a later phase
 - `portfolio`, `order`, `trade`: simulated execution and positions in Phase 3
 - `analytics`: performance calculations in Phase 4
 - `config`, `common`, `exception`: cross-cutting infrastructure
 
-The market-data module will define a provider interface so Finnhub, Alpha Vantage, or Twelve Data can be selected without coupling business logic to one vendor. Provider credentials will come from environment variables.
+## Market Data Flow
+
+```text
+React market pages
+  ↓ authenticated REST
+MarketDataController
+  ↓
+MarketDataService
+  ↓
+MarketDataProvider
+  ├── MockMarketDataProvider
+  └── FinnhubMarketDataProvider
+```
+
+`MarketDataProvider` keeps controllers and services independent from a financial vendor. The mock provider is the default development path and needs no API key. Setting `FINANCIAL_API_PROVIDER=finnhub` selects the Finnhub implementation.
+
+Financial API keys are backend environment variables only. The frontend always calls Invest Rocket’s authenticated API and never contacts Finnhub directly.
 
 ## Data and Infrastructure
 

@@ -89,6 +89,56 @@ Requires a valid Bearer JWT and returns the current user profile.
 }
 ```
 
+### `GET /api/market/search?query=AAPL`
+
+Requires a valid Bearer JWT. Searches the active market-data provider.
+
+```json
+{
+  "success": true,
+  "message": "Stock search completed successfully",
+  "data": [
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "exchange": "NASDAQ",
+      "currency": "USD",
+      "type": "Common Stock"
+    }
+  ],
+  "timestamp": "2026-06-24T16:00:00Z"
+}
+```
+
+### `GET /api/market/quote/AAPL`
+
+Requires a valid Bearer JWT.
+
+```json
+{
+  "success": true,
+  "message": "Quote fetched successfully",
+  "data": {
+    "symbol": "AAPL",
+    "companyName": "Apple Inc.",
+    "currentPrice": 195.25,
+    "changeAmount": 1.45,
+    "changePercent": 0.75,
+    "openPrice": 193.00,
+    "highPrice": 196.10,
+    "lowPrice": 192.70,
+    "previousClose": 193.80,
+    "volume": 58400000,
+    "latestTradingTime": "2026-06-24T16:00:00Z",
+    "currency": "USD",
+    "provider": "mock"
+  },
+  "timestamp": "2026-06-24T16:00:00Z"
+}
+```
+
+Provider rate limits return `429 Too Many Requests`, missing Finnhub configuration returns `503 Service Unavailable`, upstream failures return `502 Bad Gateway`, and unknown symbols return `404 Not Found`.
+
 ## Error Format
 
 Validation example:
@@ -110,12 +160,10 @@ Duplicate email returns `409 Conflict`, invalid credentials and missing authenti
 
 | Phase | Resource area | Example path |
 | --- | --- | --- |
-| 2 | Market search | `/api/market/stocks` |
-| 2 | Quotes | `/api/market/quotes/{symbol}` |
-| 2 | Watchlists | `/api/watchlists` |
+| Future | Watchlists | `/api/watchlists` |
 | 3 | Portfolio | `/api/portfolio` |
 | 3 | Simulated orders | `/api/orders` |
 | 3 | Trades | `/api/trades` |
 | 4 | Analytics | `/api/analytics/portfolio` |
 
-These future paths are architectural proposals, not Phase 1 implementations.
+These future paths are architectural proposals, not Phase 2 implementations.

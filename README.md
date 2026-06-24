@@ -4,11 +4,11 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 1 Status
+## Phase 2 Status
 
-Phase 1 adds user registration, login, BCrypt password hashing, JWT authentication, protected frontend routes, and automatic creation of a virtual USD wallet with a starting balance of `$100,000.00`.
+Phase 2 adds authenticated stock search and quote views through a provider-independent market-data layer. The default mock provider works without an API key and includes AAPL, MSFT, TSLA, AMZN, GOOGL, NVDA, and META. A backend-only Finnhub implementation is available through environment configuration.
 
-Stock search, market data, orders, portfolio calculations, watchlists, analytics, and real-time features are intentionally outside this phase.
+Buy and sell controls remain disabled placeholders. Orders, portfolio calculations, watchlists, analytics, caching, and streaming prices are intentionally outside this phase.
 
 ## Tech Stack
 
@@ -16,13 +16,14 @@ Stock search, market data, orders, portfolio calculations, watchlists, analytics
 - Frontend: React, TypeScript, Vite, Tailwind CSS, React Router
 - Database: Neon PostgreSQL over SSL; no local PostgreSQL installation required
 - Auth: Stateless JWT security with BCrypt password hashing
-- Planned: Financial market-data provider, TanStack Query, Redis, Recharts, and Docker
+- Market data: Provider abstraction with mock and Finnhub implementations
+- Planned: Trading engine, TanStack Query, Redis, Recharts, and Docker
 
 ## Planned Features
 
 - User registration and JWT authentication — complete
 - Virtual wallet creation with starting funds — complete
-- Stock search and near real-time market prices
+- Stock search and on-demand market quotes — complete
 - Simulated buy and sell orders
 - Portfolio positions and performance tracking
 - Watchlists and analytics dashboards
@@ -61,8 +62,8 @@ Required backend variables:
 | `FRONTEND_URL` | Allowed browser origin |
 | `JWT_SECRET` | JWT signing secret with at least 32 characters |
 | `JWT_EXPIRATION_MS` | Access token lifetime in milliseconds |
-| `FINANCIAL_API_PROVIDER` | Reserved market-data provider name |
-| `FINANCIAL_API_KEY` | Reserved provider API key |
+| `FINANCIAL_API_PROVIDER` | `mock` by default, or `finnhub` |
+| `FINANCIAL_API_KEY` | Required only for the Finnhub provider |
 
 PowerShell example for the current terminal:
 
@@ -73,6 +74,7 @@ $env:DATABASE_PASSWORD="your_neon_password"
 $env:JWT_SECRET="replace_with_long_secure_secret_at_least_32_characters"
 $env:JWT_EXPIRATION_MS="86400000"
 $env:FRONTEND_URL="http://localhost:5173"
+$env:FINANCIAL_API_PROVIDER="mock"
 ```
 
 Create `frontend/.env` from `frontend/.env.example` to configure the browser API URL:
@@ -137,11 +139,30 @@ Phase 1 stores the JWT in browser `localStorage` under `invest_rocket_token`. Th
 
 Registration creates both the user and their virtual wallet in one database transaction.
 
+## Market Data API
+
+Both market endpoints require `Authorization: Bearer <accessToken>`.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/market/search?query=AAPL` | Search symbols and companies |
+| `GET` | `/api/market/quote/{symbol}` | Fetch the latest available quote |
+
+The frontend never calls a financial data provider directly, and provider API keys remain on the backend.
+
+### Providers
+
+- `mock`: default development provider with deterministic sample symbols and no API key
+- `finnhub`: uses Finnhub search, quote, and company profile endpoints; requires `FINANCIAL_API_KEY`
+
+Finnhub quote responses do not include trade volume in the basic quote payload, so `volume` can be unavailable when that provider is selected.
+
 ## Roadmap
 
 - Phase 0: Foundation, documentation, health endpoint, and UI shell — complete
 - Phase 1: Users, JWT authentication, and virtual wallets — complete
-- Phase 2: Financial API integration, search, and watchlists
+- Phase 2: Market-data provider foundation, stock search, and quotes — complete
+- Future: Watchlists
 - Phase 3: Portfolio positions and simulated order execution
 - Phase 4: Trade history, performance analytics, and charts
 - Phase 5: Redis caching, Docker support, testing, and deployment hardening

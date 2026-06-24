@@ -27,6 +27,9 @@ export function Navbar() {
               <NavLink to="/dashboard" className={navLinkClass}>
                 Dashboard
               </NavLink>
+              <NavLink to="/market" className={navLinkClass}>
+                Market
+              </NavLink>
               <button
                 type="button"
                 onClick={logout}
