@@ -40,6 +40,11 @@ app:
   portfolio-snapshot:
     enabled: ${PORTFOLIO_SNAPSHOT_ENABLED:true}
     interval-ms: ${PORTFOLIO_SNAPSHOT_INTERVAL_MS:300000}
+  admin-bootstrap:
+    enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+    full-name: ${ADMIN_FULL_NAME:Invest Rocket Admin}
 
 management:
   endpoints:

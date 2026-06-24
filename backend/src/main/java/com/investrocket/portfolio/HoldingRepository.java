@@ -17,6 +17,8 @@ public interface HoldingRepository extends JpaRepository<Holding, UUID> {
 
     List<Holding> findByUser(User user);
 
+    long countByUser(User user);
+
     long deleteByUser(User user);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

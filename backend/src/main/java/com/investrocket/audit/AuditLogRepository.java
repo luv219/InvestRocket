@@ -20,4 +20,12 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
             User user,
             Instant start,
             Instant end);
+
+    List<AuditLog> findTop100ByOrderByCreatedAtDesc();
+
+    List<AuditLog> findTop100ByCategoryOrderByCreatedAtDesc(AuditCategory category);
+
+    List<AuditLog> findTop100ByUserOrderByCreatedAtDesc(User user);
+
+    List<AuditLog> findTop20ByUserOrderByCreatedAtDesc(User user);
 }

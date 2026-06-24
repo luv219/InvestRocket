@@ -4,11 +4,11 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 7 Status
+## Phase 8 Status
 
-Phase 7 adds user profile settings, secure password changes, simulator reset, backend-enforced trading risk controls, and per-user activity logs.
+Phase 8 adds ADMIN role enforcement, a protected admin dashboard, user management, platform trading metrics, system health, provider checks, and platform audit visibility.
 
-Simulator reset affects virtual balances, pending orders, and current holdings only. Historical orders and trades remain available.
+The admin bootstrap is disabled by default and never contains a real credential in source control.
 
 ## Tech Stack
 
@@ -22,6 +22,7 @@ Simulator reset affects virtual balances, pending orders, and current holdings o
 - Live updates: Spring WebSocket/STOMP, in-memory demo prices, and React STOMP client
 - Analytics: Portfolio snapshots, P/L metrics, allocation, trading statistics, and Recharts
 - Account safety: Profile settings, password change, risk controls, simulator reset, and audit logs
+- Administration: User management, platform monitoring, admin audit visibility, and system health
 - Planned: TanStack Query, Redis pub/sub, and Docker
 
 ## Planned Features
@@ -38,6 +39,7 @@ Simulator reset affects virtual balances, pending orders, and current holdings o
 - Personal watchlists with live demo prices — complete
 - Portfolio analytics and performance dashboard — complete
 - User profile, risk settings, simulator reset, and activity logs — complete
+- Admin dashboard and platform monitoring — complete
 
 ## Project Structure
 
@@ -81,6 +83,10 @@ Required backend variables:
 | `LIVE_PRICE_STREAM_INTERVAL_MS` | Delay between mock broadcasts; defaults to `5000` |
 | `PORTFOLIO_SNAPSHOT_ENABLED` | Enables scheduled portfolio snapshots |
 | `PORTFOLIO_SNAPSHOT_INTERVAL_MS` | Snapshot interval; defaults to `300000` |
+| `ADMIN_BOOTSTRAP_ENABLED` | Enables one-time initial admin creation; defaults to `false` |
+| `ADMIN_EMAIL` | Initial admin email when bootstrap is enabled |
+| `ADMIN_PASSWORD` | Initial admin password; must be at least 8 characters |
+| `ADMIN_FULL_NAME` | Initial admin display name |
 
 PowerShell example for the current terminal:
 
@@ -98,6 +104,7 @@ $env:LIVE_PRICE_STREAM_ENABLED="true"
 $env:LIVE_PRICE_STREAM_INTERVAL_MS="5000"
 $env:PORTFOLIO_SNAPSHOT_ENABLED="true"
 $env:PORTFOLIO_SNAPSHOT_INTERVAL_MS="300000"
+$env:ADMIN_BOOTSTRAP_ENABLED="false"
 ```
 
 Create `frontend/.env` from `frontend/.env.example` to configure the browser API URL:
@@ -139,7 +146,7 @@ Expected response:
 }
 ```
 
-Flyway automatically applies all migrations through `V6__create_profile_risk_and_audit_tables.sql` to the configured Neon database at startup.
+Flyway automatically applies all migrations through `V7__admin_monitoring_indexes.sql` to the configured Neon database at startup.
 
 ## Run the Frontend
 
@@ -279,11 +286,30 @@ Default risk controls limit orders to `$25,000` and 50 orders per UTC day. Limit
 
 Simulator reset requires the exact confirmation text `RESET MY SIMULATOR`. It restores the initial virtual balance, clears reserved cash and current holdings, cancels pending orders, preserves historical orders/trades, and creates an analytics snapshot.
 
+## Admin Platform API
+
+Every admin endpoint requires a valid JWT with the `ADMIN` role.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/admin/dashboard` | Platform-wide summary |
+| `GET` | `/api/admin/trading-stats` | Trading composition and rankings |
+| `GET` | `/api/admin/system-health` | Backend, database, and scheduler health |
+| `GET` | `/api/admin/audit-logs` | Recent platform activity |
+| `GET` | `/api/admin/market-data-status` | Safe provider quote check |
+| `GET` | `/api/admin/users` | User list |
+| `GET` | `/api/admin/users/{userId}` | User detail |
+| `PUT` | `/api/admin/users/{userId}` | Update role, name, or status |
+| `POST` | `/api/admin/users/{userId}/disable` | Disable a user |
+| `POST` | `/api/admin/users/{userId}/enable` | Enable a user |
+
+To create the first admin, set `ADMIN_BOOTSTRAP_ENABLED=true` with a secure email/password for one startup. If the email already exists, no account is recreated. Disable bootstrap afterward. Administrators cannot disable themselves or remove their own `ADMIN` role.
+
 ## Development Commit
 
 ```bash
 git add .
-git commit -m "feat: implement phase 7 profile settings risk controls and audit logs"
+git commit -m "feat: implement phase 8 admin dashboard and platform monitoring"
 ```
 
 ## Roadmap
@@ -296,7 +322,8 @@ git commit -m "feat: implement phase 7 profile settings risk controls and audit 
 - Phase 5: Watchlists and live demo price updates — complete
 - Phase 6: Portfolio performance analytics and charts — complete
 - Phase 7: Profile settings, risk controls, reset, and audit logs — complete
-- Phase 8: Redis caching, Docker support, testing, and deployment hardening
+- Phase 8: Admin dashboard and platform monitoring — complete
+- Phase 9: Redis caching, Docker support, testing, and deployment hardening
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 

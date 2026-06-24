@@ -153,6 +153,24 @@ Risk controls are enforced before an order reserves virtual cash or shares. The 
 
 Simulator reset is transactional and affects only virtual trading state: pending orders are cancelled, current holdings are cleared, wallet balances return to their initial amount, historical orders/trades remain, and an analytics snapshot is created. IP address and User-Agent fields remain nullable placeholders in Phase 7.
 
+## Admin Architecture
+
+```text
+Admin Frontend Routes
+  ↓
+AdminRoute role check (UX only)
+  ↓
+@PreAuthorize ADMIN Controllers
+  ↓
+AdminUserService + AdminMonitoringService
+  ↓
+Repositories + PortfolioService + Audit Logs + MarketDataService
+  ↓
+Admin Dashboard UI
+```
+
+The backend enforces the ADMIN role for every admin endpoint. The frontend check only hides navigation and redirects unauthorized users. Admin responses never expose password hashes, JWTs, or secrets. Monitoring provides simulator-platform visibility and intentionally avoids repeated paid-provider calls; the provider status endpoint performs one safe quote check per request.
+
 ## Data and Infrastructure
 
 Neon PostgreSQL is the development and deployment database. The backend receives a JDBC URL containing `sslmode=require`, username, and password through environment variables. A local PostgreSQL installation is neither required nor assumed.

@@ -10,7 +10,7 @@ The backend connects using:
 - `DATABASE_USERNAME`: Neon role
 - `DATABASE_PASSWORD`: Neon password
 
-Flyway owns schema changes. `V6__create_profile_risk_and_audit_tables.sql` adds Phase 7 account settings and activity history.
+Flyway owns schema changes. `V7__admin_monitoring_indexes.sql` adds Phase 8 indexes for administrative queries.
 
 ## Users
 
@@ -156,6 +156,12 @@ The `users` table now includes nullable `phone_number`, `country`, `profile_imag
 | `created_at` | `TIMESTAMPTZ` | UTC event time |
 
 Audit logs never store passwords, JWTs, or provider secrets.
+
+## Admin Role and Indexes
+
+Administrators reuse the existing `users.role = 'ADMIN'` value. No separate admin credential table exists.
+
+Phase 8 adds indexes for user email, role, enabled status, order user/status/symbol, trade user/symbol, and audit user/category/time. The bootstrap creates ordinary user, wallet, and risk-setting rows with an ADMIN role only when explicitly enabled.
 
 ## Data Integrity Principles
 

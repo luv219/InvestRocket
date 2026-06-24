@@ -151,4 +151,14 @@ public class User {
     public void recordLogin() {
         this.lastLoginAt = Instant.now();
     }
+
+    public void updateAdminFields(String fullName, Role role, boolean enabled) {
+        this.fullName = fullName;
+        this.role = role;
+        this.enabled = enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

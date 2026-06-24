@@ -80,6 +80,10 @@ public class AuditLog {
         return action;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     public AuditCategory getCategory() {
         return category;
     }

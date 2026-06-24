@@ -29,6 +29,7 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 - User-managed profile and password settings
 - Backend-enforced trading risk controls
 - Simulator reset and per-user activity history
+- Admin user management, platform statistics, and service health monitoring
 
 ## Intended Users
 
@@ -47,6 +48,8 @@ Watchlist prices now update through a backend-generated demo stream. These value
 Users can now review total return, realized and unrealized profit or loss, best and worst holdings, allocation, trading statistics, and historical portfolio snapshots.
 
 Users can also update profile settings, change their password, configure order safety limits, inspect account activity, and reset virtual trading state without deleting their account.
+
+Administrators can manage simulator users, inspect platform-wide trading metrics, review recent audit events, and monitor backend, database, scheduler, and market-provider status.
 
 ## Constraints
 

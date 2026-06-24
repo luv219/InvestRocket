@@ -10,6 +10,7 @@ export type AuthContextValue = {
   user: User | null
   token: string | null
   isAuthenticated: boolean
+  isAdmin: boolean
   isLoading: boolean
   login: (request: LoginRequest) => Promise<void>
   register: (request: RegisterRequest) => Promise<void>

@@ -158,7 +158,8 @@ public class GlobalExceptionHandler {
             RiskControlViolationException.class,
             InvalidCurrentPasswordException.class,
             InvalidResetConfirmationException.class,
-            InvalidAuditCategoryException.class
+            InvalidAuditCategoryException.class,
+            AdminSelfProtectionException.class
     })
     public ResponseEntity<ErrorResponse> handleTradingRequest(RuntimeException exception) {
         return ResponseEntity.badRequest().body(new ErrorResponse(

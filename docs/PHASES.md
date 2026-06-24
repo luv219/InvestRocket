@@ -80,7 +80,18 @@ Status: complete. Analytics are calculated by the backend from virtual wallet, h
 
 Status: complete. Risk controls are enforced by the backend, and simulator reset affects virtual trading state without deleting the user or historical executions.
 
-## Phase 8 — Hardening and Delivery
+## Phase 8 — Admin Dashboard and Platform Monitoring
+
+- ADMIN role and method-level authorization
+- Disabled-by-default initial admin bootstrap
+- User management and self-lockout prevention
+- Platform trading and portfolio statistics
+- System, scheduler, database, and provider monitoring
+- Admin audit visibility
+
+Status: complete. Backend authorization is authoritative; frontend role checks provide navigation and UX only.
+
+## Phase 9 — Hardening and Delivery
 
 - Redis quote caching
 - Docker support

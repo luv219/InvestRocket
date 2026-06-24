@@ -452,3 +452,39 @@ Order value, UTC daily order count, and order-type permissions are validated on 
   "createdAt": "2026-06-25T12:00:00Z"
 }
 ```
+
+## Admin APIs
+
+All endpoints require JWT authentication and the `ADMIN` role. USER tokens receive `403 Forbidden`.
+
+### Users
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/admin/users` | List users with activity counts |
+| `GET` | `/api/admin/users/{userId}` | Profile, wallet, risk, portfolio, and recent activity |
+| `PUT` | `/api/admin/users/{userId}` | Update name, role, and enabled state |
+| `POST` | `/api/admin/users/{userId}/disable` | Disable account |
+| `POST` | `/api/admin/users/{userId}/enable` | Enable account |
+
+```json
+{
+  "fullName": "Demo User",
+  "role": "USER",
+  "enabled": true
+}
+```
+
+The current administrator cannot disable their own account or remove their own ADMIN role.
+
+### Monitoring
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/admin/dashboard` | Platform-wide totals |
+| `GET` | `/api/admin/trading-stats` | Order types, symbols, top users, and recent activity |
+| `GET` | `/api/admin/system-health` | Backend, database, profile, and scheduled jobs |
+| `GET` | `/api/admin/audit-logs` | Recent platform audit logs |
+| `GET` | `/api/admin/market-data-status` | Current provider health check |
+
+Admin audit logs support `category` and `userEmail` query parameters. Metadata remains non-sensitive.

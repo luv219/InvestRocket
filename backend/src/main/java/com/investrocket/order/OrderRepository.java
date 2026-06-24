@@ -22,6 +22,16 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     long countByUserAndCreatedAtBetween(User user, Instant start, Instant end);
 
+    long countByUser(User user);
+
+    long countByStatus(OrderStatus status);
+
+    long countBySide(OrderSide side);
+
+    long countByOrderType(OrderType orderType);
+
+    List<Order> findTop20ByOrderByCreatedAtDesc();
+
     @Query("select o.id from Order o where o.status = :status")
     List<UUID> findIdsByStatus(@Param("status") OrderStatus status);
 

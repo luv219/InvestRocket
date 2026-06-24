@@ -10,4 +10,8 @@ import com.investrocket.user.User;
 public interface TradeRepository extends JpaRepository<Trade, UUID> {
 
     List<Trade> findByUserOrderByExecutedAtDesc(User user);
+
+    long countByUser(User user);
+
+    List<Trade> findTop20ByOrderByExecutedAtDesc();
 }
