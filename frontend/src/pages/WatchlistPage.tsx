@@ -208,6 +208,12 @@ export function WatchlistPage() {
                         >
                           Details
                         </Link>
+                        <Link
+                          to={`/alerts?symbol=${encodeURIComponent(item.symbol)}`}
+                          className="font-semibold text-blue-400"
+                        >
+                          Create Alert
+                        </Link>
                         <button
                           type="button"
                           onClick={() => void handleRemove(item.symbol)}

@@ -19,6 +19,9 @@ import com.investrocket.exception.InvalidResetConfirmationException;
 import com.investrocket.exception.PasswordMismatchException;
 import com.investrocket.exception.WalletNotFoundException;
 import com.investrocket.order.OrderService;
+import com.investrocket.notification.NotificationCategory;
+import com.investrocket.notification.NotificationService;
+import com.investrocket.notification.NotificationType;
 import com.investrocket.portfolio.HoldingRepository;
 import com.investrocket.user.dto.ChangePasswordRequest;
 import com.investrocket.user.dto.ResetAccountRequest;
@@ -40,6 +43,7 @@ public class UserProfileService {
     private final AnalyticsService analyticsService;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
+    private NotificationService notificationService;
 
     public UserProfileService(
             UserRepository userRepository,
@@ -56,6 +60,11 @@ public class UserProfileService {
         this.analyticsService = analyticsService;
         this.passwordEncoder = passwordEncoder;
         this.auditLogService = auditLogService;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setNotificationService(NotificationService notificationService) {
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -122,6 +131,14 @@ public class UserProfileService {
                 AuditCategory.WALLET,
                 AuditAction.SIMULATOR_RESET,
                 "Virtual simulator balance and holdings reset");
+        if (notificationService != null) {
+            notificationService.createNotification(
+                    currentUser,
+                    "Simulator reset complete",
+                    "Your virtual balance and holdings were reset successfully.",
+                    NotificationType.INFO,
+                    NotificationCategory.SYSTEM);
+        }
         createSnapshotAfterCommit(currentUser);
     }
 

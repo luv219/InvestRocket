@@ -66,6 +66,7 @@ export function OrdersPage() {
                   'Created',
                   'Executed At',
                   'Cancelled At',
+                  'Journal',
                 ].map((heading) => (
                   <th key={heading} className="px-4 py-3 font-medium">
                     {heading}
@@ -120,6 +121,14 @@ export function OrdersPage() {
                   </td>
                   <td className="px-4 py-4 text-slate-400">
                     {formatOptionalDateTime(order.cancelledAt)}
+                  </td>
+                  <td className="px-4 py-4">
+                    <Link
+                      to={`/journal?symbol=${encodeURIComponent(order.symbol)}&orderId=${encodeURIComponent(order.id)}`}
+                      className="font-semibold text-rocket-400"
+                    >
+                      Add Note
+                    </Link>
                   </td>
                 </tr>
               ))}

@@ -91,7 +91,17 @@ Status: complete. Risk controls are enforced by the backend, and simulator reset
 
 Status: complete. Backend authorization is authoritative; frontend role checks provide navigation and UX only.
 
-## Phase 9 — Hardening and Delivery
+## Phase 9 — Notifications, Price Alerts, and Trading Journal
+
+- In-app notification center and unread tracking
+- Order, reset, and triggered-alert notifications
+- Scheduled ABOVE/BELOW price alerts
+- Private journal entries with optional order/trade links
+- Protected frontend pages and navigation
+
+Status: complete. Notifications are in-app only, alerts use configured simulator market data, and all records are scoped to the authenticated user.
+
+## Phase 10 — Hardening and Delivery
 
 - Redis quote caching
 - Docker support

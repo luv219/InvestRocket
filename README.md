@@ -4,9 +4,9 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 8 Status
+## Phase 9 Status
 
-Phase 8 adds ADMIN role enforcement, a protected admin dashboard, user management, platform trading metrics, system health, provider checks, and platform audit visibility.
+Phase 9 adds authenticated in-app notifications, scheduled price alerts, and a private trading journal linked optionally to owned orders and trades.
 
 The admin bootstrap is disabled by default and never contains a real credential in source control.
 
@@ -84,6 +84,8 @@ Required backend variables:
 | `PORTFOLIO_SNAPSHOT_ENABLED` | Enables scheduled portfolio snapshots |
 | `PORTFOLIO_SNAPSHOT_INTERVAL_MS` | Snapshot interval; defaults to `300000` |
 | `ADMIN_BOOTSTRAP_ENABLED` | Enables one-time initial admin creation; defaults to `false` |
+| `PRICE_ALERT_PROCESSOR_ENABLED` | Enables scheduled active-alert checks; defaults to `true` |
+| `PRICE_ALERT_PROCESSOR_INTERVAL_MS` | Alert polling interval; defaults to `15000` |
 | `ADMIN_EMAIL` | Initial admin email when bootstrap is enabled |
 | `ADMIN_PASSWORD` | Initial admin password; must be at least 8 characters |
 | `ADMIN_FULL_NAME` | Initial admin display name |
@@ -305,11 +307,23 @@ Every admin endpoint requires a valid JWT with the `ADMIN` role.
 
 To create the first admin, set `ADMIN_BOOTSTRAP_ENABLED=true` with a secure email/password for one startup. If the email already exists, no account is recreated. Disable bootstrap afterward. Administrators cannot disable themselves or remove their own `ADMIN` role.
 
+## Notifications, Alerts, and Journal API
+
+All endpoints require `Authorization: Bearer <accessToken>` and operate only on the current user.
+
+| Module | Endpoints |
+| --- | --- |
+| Notifications | `GET /api/notifications`, `/unread`, `/summary`; `PUT /{id}/read`, `/read-all`; `DELETE /{id}` |
+| Price alerts | `POST /api/alerts`; `GET /api/alerts`, `/active`; `DELETE /api/alerts/{id}/cancel` |
+| Trading journal | `POST/GET /api/journal`; `GET /api/journal?symbol=AAPL`; `PUT/DELETE /api/journal/{id}` |
+
+Order execution, pending-order creation/cancellation, simulator reset, and triggered alerts create best-effort in-app notifications. Alerts poll configured market data every 15 seconds by default. No email, SMS, or push delivery is included.
+
 ## Development Commit
 
 ```bash
 git add .
-git commit -m "feat: implement phase 8 admin dashboard and platform monitoring"
+git commit -m "feat: implement phase 9 notifications alerts and trading journal"
 ```
 
 ## Roadmap
@@ -323,7 +337,8 @@ git commit -m "feat: implement phase 8 admin dashboard and platform monitoring"
 - Phase 6: Portfolio performance analytics and charts — complete
 - Phase 7: Profile settings, risk controls, reset, and audit logs — complete
 - Phase 8: Admin dashboard and platform monitoring — complete
-- Phase 9: Redis caching, Docker support, testing, and deployment hardening
+- Phase 9: Notifications, price alerts, and trading journal — complete
+- Phase 10: Redis caching, Docker support, testing, and deployment hardening
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 

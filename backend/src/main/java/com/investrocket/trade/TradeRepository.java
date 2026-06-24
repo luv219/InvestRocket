@@ -2,6 +2,7 @@ package com.investrocket.trade;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,6 +11,7 @@ import com.investrocket.user.User;
 public interface TradeRepository extends JpaRepository<Trade, UUID> {
 
     List<Trade> findByUserOrderByExecutedAtDesc(User user);
+    Optional<Trade> findByIdAndUser(UUID id, User user);
 
     long countByUser(User user);
 

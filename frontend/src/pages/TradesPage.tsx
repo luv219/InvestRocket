@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { getTrades } from '../features/trades/tradeService'
 import type { Trade } from '../types/trade'
@@ -28,7 +29,7 @@ export function TradesPage() {
           <table className="min-w-full divide-y divide-slate-800 text-left text-sm">
             <thead className="bg-slate-900 text-slate-400">
               <tr>
-                {['Symbol', 'Side', 'Quantity', 'Price', 'Trade Value', 'Realized P/L', 'Executed'].map((heading) => (
+                {['Symbol', 'Side', 'Quantity', 'Price', 'Trade Value', 'Realized P/L', 'Executed', 'Journal'].map((heading) => (
                   <th key={heading} className="px-4 py-3 font-medium">{heading}</th>
                 ))}
               </tr>
@@ -45,6 +46,11 @@ export function TradesPage() {
                     {formatCurrency(trade.realizedProfitLoss)}
                   </td>
                   <td className="px-4 py-4 text-slate-400">{formatDateTime(trade.executedAt)}</td>
+                  <td className="px-4 py-4">
+                    <Link to={`/journal?symbol=${encodeURIComponent(trade.symbol)}&tradeId=${encodeURIComponent(trade.id)}`} className="font-semibold text-rocket-400">
+                      Add Note
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

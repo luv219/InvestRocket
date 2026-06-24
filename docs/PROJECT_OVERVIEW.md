@@ -30,6 +30,9 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 - Backend-enforced trading risk controls
 - Simulator reset and per-user activity history
 - Admin user management, platform statistics, and service health monitoring
+- In-app notifications for trading and simulator lifecycle events
+- Scheduled price alerts using configured market data
+- Private trading journal with optional order and trade links
 
 ## Intended Users
 
@@ -50,6 +53,8 @@ Users can now review total return, realized and unrealized profit or loss, best 
 Users can also update profile settings, change their password, configure order safety limits, inspect account activity, and reset virtual trading state without deleting their account.
 
 Administrators can manage simulator users, inspect platform-wide trading metrics, review recent audit events, and monitor backend, database, scheduler, and market-provider status.
+
+Users can now review in-app notifications, create ABOVE or BELOW price alerts, and maintain a private journal for simulated trading decisions. Email, SMS, push delivery, and AI recommendations remain out of scope.
 
 ## Constraints
 

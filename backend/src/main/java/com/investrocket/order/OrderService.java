@@ -22,6 +22,9 @@ import com.investrocket.exception.OrderNotFoundException;
 import com.investrocket.exception.WalletNotFoundException;
 import com.investrocket.marketdata.MarketDataService;
 import com.investrocket.marketdata.dto.StockQuoteResponse;
+import com.investrocket.notification.NotificationCategory;
+import com.investrocket.notification.NotificationService;
+import com.investrocket.notification.NotificationType;
 import com.investrocket.order.dto.CreateOrderRequest;
 import com.investrocket.order.dto.OrderResponse;
 import com.investrocket.portfolio.Holding;
@@ -43,6 +46,7 @@ public class OrderService {
     private final MarketDataService marketDataService;
     private RiskSettingsService riskSettingsService;
     private AuditLogService auditLogService;
+    private NotificationService notificationService;
 
     public OrderService(
             OrderRepository orderRepository,
@@ -67,6 +71,11 @@ public class OrderService {
         this.auditLogService = auditLogService;
     }
 
+    @Autowired
+    void setNotificationService(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
+
     @Transactional
     public OrderResponse placeOrder(CreateOrderRequest request, User currentUser) {
         validateRequest(request);
@@ -86,11 +95,13 @@ public class OrderService {
         if (shouldExecuteImmediately(request, currentPrice)) {
             Order order = executeImmediateOrder(request, currentUser, quote, currentPrice);
             logOrderPlaced(order);
+            notifyOrderExecuted(order);
             return OrderResponse.from(order, executionMessage(request.side()));
         }
 
         Order pendingOrder = createPendingOrder(request, currentUser, quote, currentPrice);
         logOrderPlaced(pendingOrder);
+        notifyPendingOrderCreated(pendingOrder);
         return OrderResponse.from(pendingOrder, "Order created and is pending");
     }
 
@@ -132,6 +143,7 @@ public class OrderService {
                     "{\"orderId\":\"" + order.getId() + "\",\"symbol\":\""
                             + order.getSymbol() + "\"}");
         }
+        notifyOrderCancelled(order);
         return OrderResponse.from(order, "Pending order cancelled successfully");
     }
 
@@ -161,6 +173,7 @@ public class OrderService {
         }
 
         executeReservedOrder(order, quote, currentPrice);
+        notifyOrderExecuted(order);
         return Optional.of(OrderResponse.from(order, executionMessage(order.getSide())));
     }
 
@@ -481,5 +494,49 @@ public class OrderService {
         return side == OrderSide.BUY
                 ? "Buy order executed successfully"
                 : "Sell order executed successfully";
+    }
+
+    private void notifyOrderExecuted(Order order) {
+        if (notificationService == null) {
+            return;
+        }
+        notificationService.createNotification(
+                order.getUser(),
+                "Order executed",
+                order.getSide() + " order for " + order.getQuantity() + " "
+                        + order.getSymbol() + " executed at " + order.getExecutedPrice() + ".",
+                NotificationType.SUCCESS,
+                NotificationCategory.TRADE,
+                "ORDER",
+                order.getId());
+    }
+
+    private void notifyPendingOrderCreated(Order order) {
+        if (notificationService == null) {
+            return;
+        }
+        notificationService.createNotification(
+                order.getUser(),
+                "Pending order created",
+                order.getOrderType() + " " + order.getSide() + " order for "
+                        + order.getSymbol() + " is waiting for its trigger.",
+                NotificationType.INFO,
+                NotificationCategory.ORDER,
+                "ORDER",
+                order.getId());
+    }
+
+    private void notifyOrderCancelled(Order order) {
+        if (notificationService == null) {
+            return;
+        }
+        notificationService.createNotification(
+                order.getUser(),
+                "Pending order cancelled",
+                "Your pending order for " + order.getSymbol() + " was cancelled.",
+                NotificationType.WARNING,
+                NotificationCategory.ORDER,
+                "ORDER",
+                order.getId());
     }
 }

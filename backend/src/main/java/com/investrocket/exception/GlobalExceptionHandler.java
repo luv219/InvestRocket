@@ -178,6 +178,20 @@ public class GlobalExceptionHandler {
                 Instant.now()));
     }
 
+    @ExceptionHandler({
+            NotificationNotFoundException.class,
+            PriceAlertNotFoundException.class,
+            JournalEntryNotFoundException.class,
+            JournalLinkNotFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handlePhaseNineNotFound(RuntimeException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+                false,
+                exception.getMessage(),
+                Map.of(),
+                Instant.now()));
+    }
+
     @ExceptionHandler(WatchlistItemNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleWatchlistItemNotFound(
             WatchlistItemNotFoundException exception) {

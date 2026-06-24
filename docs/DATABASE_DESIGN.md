@@ -163,6 +163,20 @@ Administrators reuse the existing `users.role = 'ADMIN'` value. No separate admi
 
 Phase 8 adds indexes for user email, role, enabled status, order user/status/symbol, trade user/symbol, and audit user/category/time. The bootstrap creates ordinary user, wallet, and risk-setting rows with an ADMIN role only when explicitly enabled.
 
+## Notifications
+
+`notifications` stores user-owned in-app messages, type/category, read state, optional related entity metadata, and UTC timestamps. Indexes cover owner, read state, and creation time.
+
+## Price Alerts
+
+`price_alerts` stores uppercase symbols, positive target prices, `ABOVE`/`BELOW` conditions, lifecycle status, trigger price/time, and owner timestamps. Users may create multiple alerts per symbol.
+
+## Trading Journal Entries
+
+`trading_journal_entries` stores private title/content, mood, strategy, symbol, comma-separated tags, and optional foreign keys to orders and trades. Linked records are validated against the current user before persistence.
+
+Flyway migration `V8__create_notifications_alerts_and_journal.sql` creates all three tables and supporting indexes for Neon PostgreSQL.
+
 ## Data Integrity Principles
 
 - Use database transactions for wallet, holding, order, and trade updates.

@@ -20,6 +20,9 @@ const quickLinks = [
   { to: '/trades', label: 'Trades', description: 'Review executions and realized profit or loss.' },
   { to: '/activity', label: 'Activity', description: 'Review your account and simulator audit history.' },
   { to: '/settings', label: 'Settings', description: 'Manage profile, password, risk controls, and simulator reset.' },
+  { to: '/notifications', label: 'Notifications', description: 'Review order, alert, and simulator updates.' },
+  { to: '/alerts', label: 'Price Alerts', description: 'Create simulated price thresholds for tracked stocks.' },
+  { to: '/journal', label: 'Trading Journal', description: 'Record decisions and lessons from virtual trades.' },
 ]
 
 export function DashboardPage() {

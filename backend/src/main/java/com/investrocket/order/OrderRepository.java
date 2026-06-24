@@ -17,6 +17,7 @@ import jakarta.persistence.LockModeType;
 public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     List<Order> findByUserOrderByCreatedAtDesc(User user);
+    Optional<Order> findByIdAndUser(UUID id, User user);
 
     List<Order> findByUserAndStatusOrderByCreatedAtDesc(User user, OrderStatus status);
 

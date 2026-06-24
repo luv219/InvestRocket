@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 
 import { useAuth } from '../features/auth/useAuth'
+import { getNotificationSummary } from '../features/notifications/notificationService'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-lg px-3 py-2 text-sm font-medium ${
@@ -11,6 +13,16 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export function Navbar() {
   const { isAuthenticated, isAdmin, logout } = useAuth()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return
+    }
+    getNotificationSummary()
+      .then((summary) => setUnreadCount(summary.unreadCount))
+      .catch(() => setUnreadCount(0))
+  }, [isAuthenticated])
 
   return (
     <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur">
@@ -38,6 +50,15 @@ export function Navbar() {
               </NavLink>
               <NavLink to="/analytics" className={navLinkClass}>
                 Analytics
+              </NavLink>
+              <NavLink to="/alerts" className={navLinkClass}>
+                Alerts
+              </NavLink>
+              <NavLink to="/journal" className={navLinkClass}>
+                Journal
+              </NavLink>
+              <NavLink to="/notifications" className={navLinkClass}>
+                Notifications{isAuthenticated && unreadCount > 0 ? ` (${unreadCount})` : ''}
               </NavLink>
               <NavLink to="/orders" className={navLinkClass}>
                 Orders

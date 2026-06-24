@@ -233,6 +233,12 @@ export function StockDetailPage() {
             <span className="text-xs font-semibold text-rocket-300">
               ● Live demo price updates enabled
             </span>
+            <Link
+              to={`/alerts?symbol=${encodeURIComponent(displayedQuote.symbol)}`}
+              className="rounded-lg border border-blue-500/40 px-4 py-2 text-sm font-semibold text-blue-300 hover:bg-blue-500/10"
+            >
+              Create Price Alert
+            </Link>
           </div>
           {watchlistMessage && (
             <p className="mt-3 text-sm text-slate-300">{watchlistMessage}</p>

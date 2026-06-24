@@ -179,6 +179,42 @@ Redis is deferred. A later phase may use it for short-lived quote caching, provi
 
 Docker is also deferred. The placeholder directory reserves a location for backend and frontend images plus deployment-oriented orchestration.
 
+## Notification and Alert Architecture
+
+```text
+OrderService / Simulator Reset / PriceAlertService
+  ↓
+NotificationService (isolated best-effort transaction)
+  ↓
+NotificationController
+  ↓
+Frontend Notification Center
+
+PriceAlertProcessor
+  ↓
+MarketDataService
+  ↓
+PriceAlertService
+  ↓
+NotificationService
+```
+
+Notifications are in-app only. Price alerts use mock or configured backend market data, isolate failures per symbol, and never expose provider keys to the browser.
+
+## Trading Journal Architecture
+
+```text
+Frontend Journal Page
+  ↓
+TradingJournalController
+  ↓
+TradingJournalService
+  ↓
+TradingJournalRepository
+```
+
+The backend resolves ownership from JWT identity. Optional order and trade links are accepted only when those records belong to the same user.
+
 ## Security
 
 Spring Security uses stateless JWT authentication. Registration and login are public, `/api/auth/me` is protected, and future API routes require authentication by default. Passwords are hashed with BCrypt, and JWT signing configuration comes from environment variables.

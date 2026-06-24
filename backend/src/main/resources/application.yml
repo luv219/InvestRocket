@@ -45,6 +45,9 @@ app:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
     full-name: ${ADMIN_FULL_NAME:Invest Rocket Admin}
+  price-alert-processor:
+    enabled: ${PRICE_ALERT_PROCESSOR_ENABLED:true}
+    interval-ms: ${PRICE_ALERT_PROCESSOR_INTERVAL_MS:15000}
 
 management:
   endpoints:

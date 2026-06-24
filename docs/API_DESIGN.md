@@ -488,3 +488,45 @@ The current administrator cannot disable their own account or remove their own A
 | `GET` | `/api/admin/market-data-status` | Current provider health check |
 
 Admin audit logs support `category` and `userEmail` query parameters. Metadata remains non-sensitive.
+
+## Notifications
+
+All endpoints require JWT authentication and return only the current user's records.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/notifications` | List notifications |
+| `GET` | `/api/notifications/unread` | List unread notifications |
+| `GET` | `/api/notifications/summary` | Unread count and recent items |
+| `PUT` | `/api/notifications/{notificationId}/read` | Mark one as read |
+| `PUT` | `/api/notifications/read-all` | Mark all as read |
+| `DELETE` | `/api/notifications/{notificationId}` | Delete one notification |
+
+## Price Alerts
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/alerts` | Create an ABOVE or BELOW alert |
+| `GET` | `/api/alerts` | List all owned alerts |
+| `GET` | `/api/alerts/active` | List active owned alerts |
+| `DELETE` | `/api/alerts/{alertId}/cancel` | Cancel an active alert |
+
+```json
+{
+  "symbol": "AAPL",
+  "condition": "ABOVE",
+  "targetPrice": 200.00
+}
+```
+
+## Trading Journal
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/journal` | Create an entry |
+| `GET` | `/api/journal` | List owned entries |
+| `GET` | `/api/journal?symbol=AAPL` | Filter owned entries |
+| `PUT` | `/api/journal/{entryId}` | Update an owned entry |
+| `DELETE` | `/api/journal/{entryId}` | Delete an owned entry |
+
+Optional `orderId` and `tradeId` values are accepted only when the linked record belongs to the authenticated user.

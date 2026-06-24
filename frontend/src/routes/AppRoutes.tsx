@@ -14,14 +14,17 @@ import { DashboardPage } from '../pages/DashboardPage'
 import { LandingPage } from '../pages/LandingPage'
 import { LoginPage } from '../pages/LoginPage'
 import { MarketPage } from '../pages/MarketPage'
+import { NotificationsPage } from '../pages/NotificationsPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { OrdersPage } from '../pages/OrdersPage'
 import { PendingOrdersPage } from '../pages/PendingOrdersPage'
 import { PortfolioPage } from '../pages/PortfolioPage'
+import { PriceAlertsPage } from '../pages/PriceAlertsPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { SettingsPage } from '../pages/SettingsPage'
 import { StockDetailPage } from '../pages/StockDetailPage'
 import { TradesPage } from '../pages/TradesPage'
+import { TradingJournalPage } from '../pages/TradingJournalPage'
 import { WatchlistPage } from '../pages/WatchlistPage'
 import { AdminRoute } from './AdminRoute'
 import { ProtectedRoute } from './ProtectedRoute'
@@ -65,6 +68,9 @@ export function AppRoutes() {
           <Route path="trades" element={<TradesPage />} />
           <Route path="activity" element={<ActivityPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="alerts" element={<PriceAlertsPage />} />
+          <Route path="journal" element={<TradingJournalPage />} />
         </Route>
         <Route element={<AdminRoute />}>
           <Route path="admin" element={<AdminDashboardPage />} />
