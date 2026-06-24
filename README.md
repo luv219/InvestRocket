@@ -4,11 +4,11 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 2 Status
+## Phase 3 Status
 
-Phase 2 adds authenticated stock search and quote views through a provider-independent market-data layer. The default mock provider works without an API key and includes AAPL, MSFT, TSLA, AMZN, GOOGL, NVDA, and META. A backend-only Finnhub implementation is available through environment configuration.
+Phase 3 adds a transactional virtual trading engine for market buy and sell orders. Users can spend virtual wallet cash, maintain holdings with weighted-average cost, view portfolio valuation, and review order and trade history.
 
-Buy and sell controls remain disabled placeholders. Orders, portfolio calculations, watchlists, analytics, caching, and streaming prices are intentionally outside this phase.
+Only immediately executed `MARKET` orders are supported. Limit orders, stop-loss orders, watchlists, charts, caching, and streaming prices remain outside this phase.
 
 ## Tech Stack
 
@@ -17,15 +17,17 @@ Buy and sell controls remain disabled placeholders. Orders, portfolio calculatio
 - Database: Neon PostgreSQL over SSL; no local PostgreSQL installation required
 - Auth: Stateless JWT security with BCrypt password hashing
 - Market data: Provider abstraction with mock and Finnhub implementations
-- Planned: Trading engine, TanStack Query, Redis, Recharts, and Docker
+- Trading: Transactional simulated market orders, holdings, orders, and trades
+- Planned: TanStack Query, Redis, Recharts, and Docker
 
 ## Planned Features
 
 - User registration and JWT authentication — complete
 - Virtual wallet creation with starting funds — complete
 - Stock search and on-demand market quotes — complete
-- Simulated buy and sell orders
-- Portfolio positions and performance tracking
+- Simulated market buy and sell orders — complete
+- Portfolio holdings and valuation — complete
+- Order and trade history — complete
 - Watchlists and analytics dashboards
 
 ## Project Structure
@@ -157,13 +159,45 @@ The frontend never calls a financial data provider directly, and provider API ke
 
 Finnhub quote responses do not include trade volume in the basic quote payload, so `volume` can be unavailable when that provider is selected.
 
+## Trading API
+
+All trading endpoints require `Authorization: Bearer <accessToken>`.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/orders` | Execute a virtual market buy or sell |
+| `GET` | `/api/orders` | Current user’s order history |
+| `GET` | `/api/trades` | Current user’s trade history |
+| `GET` | `/api/portfolio/holdings` | Current holdings with market valuation |
+| `GET` | `/api/portfolio/summary` | Wallet and portfolio summary |
+
+The frontend never sends an execution price. The backend fetches the active provider quote, validates virtual cash or holdings, and updates wallet, holding, order, and trade records in one transaction.
+
+Example request:
+
+```json
+{
+  "symbol": "AAPL",
+  "side": "BUY",
+  "orderType": "MARKET",
+  "quantity": 1
+}
+```
+
+## Development Commit
+
+```bash
+git add .
+git commit -m "feat: implement phase 3 trading engine MVP"
+```
+
 ## Roadmap
 
 - Phase 0: Foundation, documentation, health endpoint, and UI shell — complete
 - Phase 1: Users, JWT authentication, and virtual wallets — complete
 - Phase 2: Market-data provider foundation, stock search, and quotes — complete
+- Phase 3: Transactional market orders, holdings, portfolio, orders, and trades — complete
 - Future: Watchlists
-- Phase 3: Portfolio positions and simulated order execution
 - Phase 4: Trade history, performance analytics, and charts
 - Phase 5: Redis caching, Docker support, testing, and deployment hardening
 

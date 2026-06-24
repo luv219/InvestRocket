@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,6 +25,16 @@ public class GlobalExceptionHandler {
         }
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(false, "Validation failed", errors, Instant.now()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleUnreadableRequest(
+            HttpMessageNotReadableException exception) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+                false,
+                "Request body contains an invalid value",
+                Map.of(),
+                Instant.now()));
     }
 
     @ExceptionHandler(PasswordMismatchException.class)
@@ -121,6 +132,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(
                 false,
                 "Unable to fetch market data",
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler({
+            InsufficientFundsException.class,
+            InsufficientHoldingsException.class,
+            UnsupportedOrderTypeException.class
+    })
+    public ResponseEntity<ErrorResponse> handleTradingRequest(RuntimeException exception) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+                false,
+                exception.getMessage(),
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler(WalletNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleWalletNotFound(WalletNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+                false,
+                exception.getMessage(),
                 Map.of(),
                 Instant.now()));
     }

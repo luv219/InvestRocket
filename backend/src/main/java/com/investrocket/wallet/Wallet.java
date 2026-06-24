@@ -95,4 +95,12 @@ public class Wallet {
     public Instant getUpdatedAt() {
         return updatedAt;
     }
+
+    public void debit(BigDecimal amount) {
+        cashBalance = cashBalance.subtract(amount);
+    }
+
+    public void credit(BigDecimal amount) {
+        cashBalance = cashBalance.add(amount);
+    }
 }

@@ -14,7 +14,7 @@ export function Navbar() {
 
   return (
     <header className="border-b border-slate-800 bg-slate-950/90 backdrop-blur">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-4">
         <Link to="/" className="flex items-center gap-3 font-semibold text-white">
           <span className="grid size-9 place-items-center rounded-xl bg-rocket-500 text-lg text-slate-950">
             ↗
@@ -29,6 +29,15 @@ export function Navbar() {
               </NavLink>
               <NavLink to="/market" className={navLinkClass}>
                 Market
+              </NavLink>
+              <NavLink to="/portfolio" className={navLinkClass}>
+                Portfolio
+              </NavLink>
+              <NavLink to="/orders" className={navLinkClass}>
+                Orders
+              </NavLink>
+              <NavLink to="/trades" className={navLinkClass}>
+                Trades
               </NavLink>
               <button
                 type="button"

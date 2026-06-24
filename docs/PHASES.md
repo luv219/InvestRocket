@@ -41,6 +41,8 @@ Watchlists remain deferred.
 - Transaction-safe simulated execution
 - Trade history and virtual cash settlement
 
+Status: complete. Phase 3 supports whole-share `MARKET` orders only, weighted-average holdings, realized sell profit or loss, portfolio valuation, and order/trade history.
+
 ## Phase 4 — Analytics
 
 - Portfolio valuation and returns

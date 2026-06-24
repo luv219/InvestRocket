@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { MarketStatCard } from '../components/MarketStatCard'
 import { getMarketErrorMessage } from '../features/market/marketErrors'
 import { getQuote } from '../features/market/marketService'
+import { placeOrder } from '../features/orders/orderService'
 import type { StockQuote } from '../types/market'
+import type { Order, OrderSide } from '../types/order'
+import { getApiErrorMessage } from '../utils/apiError'
 
 function formatMoney(value: number | null, currency: string | null) {
   if (value === null) {
@@ -33,6 +36,11 @@ export function StockDetailPage() {
   const [quote, setQuote] = useState<StockQuote | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [side, setSide] = useState<OrderSide>('BUY')
+  const [quantity, setQuantity] = useState(1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [orderError, setOrderError] = useState('')
+  const [executedOrder, setExecutedOrder] = useState<Order | null>(null)
 
   useEffect(() => {
     async function loadQuote() {
@@ -49,6 +57,31 @@ export function StockDetailPage() {
 
     void loadQuote()
   }, [symbol])
+
+  async function handleOrderSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!quote || quantity < 1) {
+      setOrderError('Quantity must be greater than 0')
+      return
+    }
+
+    setOrderError('')
+    setExecutedOrder(null)
+    setIsSubmitting(true)
+    try {
+      const order = await placeOrder({
+        symbol: quote.symbol,
+        side,
+        orderType: 'MARKET',
+        quantity,
+      })
+      setExecutedOrder(order)
+    } catch (requestError) {
+      setOrderError(getApiErrorMessage(requestError, 'Unable to place market order'))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -132,21 +165,81 @@ export function StockDetailPage() {
         <MarketStatCard label="Provider" value={quote.provider} />
       </section>
 
-      <section className="mt-8 flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:flex-row">
-        <button
-          type="button"
-          disabled
-          className="flex-1 cursor-not-allowed rounded-xl bg-rocket-500/30 px-5 py-3 font-semibold text-rocket-100 opacity-60"
-        >
-          Buy Coming Soon
-        </button>
-        <button
-          type="button"
-          disabled
-          className="flex-1 cursor-not-allowed rounded-xl bg-red-500/20 px-5 py-3 font-semibold text-red-200 opacity-60"
-        >
-          Sell Coming Soon
-        </button>
+      <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rocket-400">
+            Market order
+          </p>
+          <h2 className="mt-2 text-2xl font-bold text-white">Place a virtual trade</h2>
+          <p className="mt-2 text-sm text-amber-200">
+            This is a virtual market order using simulated funds.
+          </p>
+        </div>
+
+        <form onSubmit={handleOrderSubmit} className="mt-6 grid gap-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
+          <label>
+            <span className="text-sm font-medium text-slate-300">Side</span>
+            <select
+              value={side}
+              onChange={(event) => setSide(event.target.value as OrderSide)}
+              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-rocket-500"
+            >
+              <option value="BUY">BUY</option>
+              <option value="SELL">SELL</option>
+            </select>
+          </label>
+          <label>
+            <span className="text-sm font-medium text-slate-300">Quantity</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              required
+              value={quantity}
+              onChange={(event) => setQuantity(Number(event.target.value))}
+              className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-rocket-500"
+            />
+          </label>
+          <div>
+            <p className="text-sm font-medium text-slate-300">Estimated total</p>
+            <p className="mt-2 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 font-semibold text-white">
+              {formatMoney(quote.currentPrice * Math.max(quantity, 0), quote.currency)}
+            </p>
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`rounded-xl px-6 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
+              side === 'BUY'
+                ? 'bg-rocket-500 text-slate-950 hover:bg-rocket-400'
+                : 'bg-red-500 text-white hover:bg-red-400'
+            }`}
+          >
+            {isSubmitting ? 'Executing...' : `${side} MARKET`}
+          </button>
+        </form>
+
+        {orderError && (
+          <p role="alert" className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {orderError}
+          </p>
+        )}
+
+        {executedOrder && (
+          <div className="mt-5 rounded-xl border border-rocket-500/30 bg-rocket-500/10 px-5 py-4">
+            <p className="font-semibold text-rocket-300">{executedOrder.message}</p>
+            <p className="mt-1 text-sm text-slate-300">
+              {executedOrder.quantity} {executedOrder.symbol} at{' '}
+              {formatMoney(executedOrder.executedPrice, quote.currency)} for{' '}
+              {formatMoney(executedOrder.totalAmount, quote.currency)}.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+              <Link to="/portfolio" className="text-rocket-400 hover:text-rocket-300">View Portfolio</Link>
+              <Link to="/orders" className="text-rocket-400 hover:text-rocket-300">View Orders</Link>
+              <Link to="/trades" className="text-rocket-400 hover:text-rocket-300">View Trades</Link>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   )

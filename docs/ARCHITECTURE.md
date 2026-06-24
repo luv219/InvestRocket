@@ -51,6 +51,26 @@ MarketDataProvider
 
 Financial API keys are backend environment variables only. The frontend always calls Invest Rocket’s authenticated API and never contacts Finnhub directly.
 
+## Trading Engine Flow
+
+```text
+Frontend market order form
+  ↓ authenticated request without trusted price
+OrderController
+  ↓
+OrderService
+  ↓ fetch latest quote
+MarketDataService
+  ↓ transactional update
+Wallet + Holding + Order + Trade
+  ↓ read model
+PortfolioService
+```
+
+The backend always selects the execution price from `MarketDataService`. It never accepts a client-supplied execution price. Wallet and matching holding rows are locked during execution, and the wallet, holding, order, and trade changes commit or roll back together.
+
+All executions are virtual simulations. Phase 3 supports only immediately executed whole-share market orders.
+
 ## Data and Infrastructure
 
 Neon PostgreSQL is the development and deployment database. The backend receives a JDBC URL containing `sslmode=require`, username, and password through environment variables. A local PostgreSQL installation is neither required nor assumed.

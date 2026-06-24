@@ -18,6 +18,8 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 - Protected dashboard routes and authenticated navigation
 - Authenticated stock search and quote pages
 - Mock market-data provider and backend-only Finnhub integration
+- Virtual market buy and sell execution
+- Portfolio holdings, wallet valuation, order history, and trade history
 
 ## Intended Users
 
@@ -27,9 +29,9 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 
 ## Future Capabilities
 
-Authenticated users can now search stocks and view on-demand quotes. Buy and sell buttons are placeholders only and do not change wallet balances or create trades.
+Authenticated users can search stocks, view quotes, and place virtual whole-share market buy and sell orders. Successful orders update virtual cash and holdings and create order and trade history records.
 
-Later phases will add watchlists, simulated orders and trades, portfolio tracking, and analytics.
+Only market orders are supported at this stage. Later phases may add watchlists, advanced order types, historical snapshots, and analytics.
 
 ## Constraints
 
