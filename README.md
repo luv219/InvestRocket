@@ -4,11 +4,11 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 6 Status
+## Phase 7 Status
 
-Phase 6 adds backend-calculated portfolio analytics, persisted performance snapshots, allocation and holding analysis, trading statistics, and a protected Recharts dashboard.
+Phase 7 adds user profile settings, secure password changes, simulator reset, backend-enforced trading risk controls, and per-user activity logs.
 
-All balances, returns, and charts remain based on simulated trading and the configured market-data provider.
+Simulator reset affects virtual balances, pending orders, and current holdings only. Historical orders and trades remain available.
 
 ## Tech Stack
 
@@ -21,6 +21,7 @@ All balances, returns, and charts remain based on simulated trading and the conf
 - Advanced orders: Pending lifecycle, reservation, cancellation, and scheduled triggers
 - Live updates: Spring WebSocket/STOMP, in-memory demo prices, and React STOMP client
 - Analytics: Portfolio snapshots, P/L metrics, allocation, trading statistics, and Recharts
+- Account safety: Profile settings, password change, risk controls, simulator reset, and audit logs
 - Planned: TanStack Query, Redis pub/sub, and Docker
 
 ## Planned Features
@@ -36,6 +37,7 @@ All balances, returns, and charts remain based on simulated trading and the conf
 - Order and trade history — complete
 - Personal watchlists with live demo prices — complete
 - Portfolio analytics and performance dashboard — complete
+- User profile, risk settings, simulator reset, and activity logs — complete
 
 ## Project Structure
 
@@ -137,7 +139,7 @@ Expected response:
 }
 ```
 
-Flyway automatically applies all migrations through `V5__create_portfolio_snapshots.sql` to the configured Neon database at startup.
+Flyway automatically applies all migrations through `V6__create_profile_risk_and_audit_tables.sql` to the configured Neon database at startup.
 
 ## Run the Frontend
 
@@ -258,11 +260,30 @@ All analytics endpoints require `Authorization: Bearer <accessToken>`. Calculati
 
 The scheduler creates snapshots every five minutes by default. Daily P/L uses the latest prior-day snapshot as its baseline. Recharts is used only to visualize backend response values.
 
+## Account Settings API
+
+All endpoints require `Authorization: Bearer <accessToken>` and resolve the current user from the JWT.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/profile` | Fetch profile settings |
+| `PUT` | `/api/profile` | Update profile information |
+| `PUT` | `/api/profile/password` | Change password after current-password verification |
+| `POST` | `/api/profile/reset-simulator` | Reset virtual balance and holdings |
+| `GET` | `/api/profile/risk-settings` | Fetch trading limits |
+| `PUT` | `/api/profile/risk-settings` | Update trading limits |
+| `GET` | `/api/activity` | Fetch account activity |
+| `GET` | `/api/activity?category=ORDER` | Filter activity by category |
+
+Default risk controls limit orders to `$25,000` and 50 orders per UTC day. Limits and order-type permissions are enforced by the backend before funds or shares are reserved.
+
+Simulator reset requires the exact confirmation text `RESET MY SIMULATOR`. It restores the initial virtual balance, clears reserved cash and current holdings, cancels pending orders, preserves historical orders/trades, and creates an analytics snapshot.
+
 ## Development Commit
 
 ```bash
 git add .
-git commit -m "feat: implement phase 6 portfolio analytics dashboard"
+git commit -m "feat: implement phase 7 profile settings risk controls and audit logs"
 ```
 
 ## Roadmap
@@ -274,7 +295,8 @@ git commit -m "feat: implement phase 6 portfolio analytics dashboard"
 - Phase 4: Limit orders, stop-loss sells, pending processing, and cancellation — complete
 - Phase 5: Watchlists and live demo price updates — complete
 - Phase 6: Portfolio performance analytics and charts — complete
-- Phase 7: Redis caching, Docker support, testing, and deployment hardening
+- Phase 7: Profile settings, risk controls, reset, and audit logs — complete
+- Phase 8: Redis caching, Docker support, testing, and deployment hardening
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 

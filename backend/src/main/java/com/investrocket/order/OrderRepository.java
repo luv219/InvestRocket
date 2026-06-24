@@ -3,6 +3,7 @@ package com.investrocket.order;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.Instant;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -18,6 +19,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findByUserOrderByCreatedAtDesc(User user);
 
     List<Order> findByUserAndStatusOrderByCreatedAtDesc(User user, OrderStatus status);
+
+    long countByUserAndCreatedAtBetween(User user, Instant start, Instant end);
 
     @Query("select o.id from Order o where o.status = :status")
     List<UUID> findIdsByStatus(@Param("status") OrderStatus status);

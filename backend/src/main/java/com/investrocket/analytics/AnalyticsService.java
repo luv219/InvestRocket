@@ -13,7 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.investrocket.audit.AuditAction;
+import com.investrocket.audit.AuditCategory;
+import com.investrocket.audit.AuditLogService;
 import com.investrocket.analytics.dto.AllocationResponse;
 import com.investrocket.analytics.dto.HoldingPerformanceResponse;
 import com.investrocket.analytics.dto.PortfolioAnalyticsResponse;
@@ -47,6 +51,7 @@ public class AnalyticsService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final Clock clock;
+    private AuditLogService auditLogService;
 
     public AnalyticsService(
             PortfolioSnapshotRepository snapshotRepository,
@@ -80,6 +85,11 @@ public class AnalyticsService {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.clock = clock;
+    }
+
+    @Autowired
+    void setAuditLogService(AuditLogService auditLogService) {
+        this.auditLogService = auditLogService;
     }
 
     @Transactional(readOnly = true)
@@ -209,7 +219,15 @@ public class AnalyticsService {
                         wallet.getInitialBalance()),
                 snapshotDate,
                 snapshotTime);
-        return toPerformancePoint(snapshotRepository.save(snapshot));
+        PortfolioSnapshot savedSnapshot = snapshotRepository.save(snapshot);
+        if (auditLogService != null) {
+            auditLogService.log(
+                    currentUser,
+                    AuditCategory.ANALYTICS,
+                    AuditAction.SNAPSHOT_CREATED,
+                    "Portfolio analytics snapshot created");
+        }
+        return toPerformancePoint(savedSnapshot);
     }
 
     public void createSnapshotsForAllUsers() {

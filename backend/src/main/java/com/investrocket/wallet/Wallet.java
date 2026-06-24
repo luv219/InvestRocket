@@ -126,4 +126,9 @@ public class Wallet {
         reservedBalance = reservedBalance.subtract(reservedAmount);
         cashBalance = cashBalance.add(reservedAmount.subtract(executedAmount));
     }
+
+    public void reset() {
+        cashBalance = initialBalance;
+        reservedBalance = BigDecimal.ZERO.setScale(2);
+    }
 }

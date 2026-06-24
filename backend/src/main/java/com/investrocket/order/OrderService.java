@@ -9,7 +9,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.investrocket.audit.AuditAction;
+import com.investrocket.audit.AuditCategory;
+import com.investrocket.audit.AuditLogService;
 import com.investrocket.exception.InsufficientFundsException;
 import com.investrocket.exception.InsufficientHoldingsException;
 import com.investrocket.exception.InvalidOrderRequestException;
@@ -25,6 +29,7 @@ import com.investrocket.portfolio.HoldingRepository;
 import com.investrocket.trade.Trade;
 import com.investrocket.trade.TradeRepository;
 import com.investrocket.user.User;
+import com.investrocket.user.RiskSettingsService;
 import com.investrocket.wallet.Wallet;
 import com.investrocket.wallet.WalletRepository;
 
@@ -36,6 +41,8 @@ public class OrderService {
     private final HoldingRepository holdingRepository;
     private final WalletRepository walletRepository;
     private final MarketDataService marketDataService;
+    private RiskSettingsService riskSettingsService;
+    private AuditLogService auditLogService;
 
     public OrderService(
             OrderRepository orderRepository,
@@ -50,19 +57,40 @@ public class OrderService {
         this.marketDataService = marketDataService;
     }
 
+    @Autowired
+    void setRiskSettingsService(RiskSettingsService riskSettingsService) {
+        this.riskSettingsService = riskSettingsService;
+    }
+
+    @Autowired
+    void setAuditLogService(AuditLogService auditLogService) {
+        this.auditLogService = auditLogService;
+    }
+
     @Transactional
     public OrderResponse placeOrder(CreateOrderRequest request, User currentUser) {
         validateRequest(request);
         String symbol = request.symbol().trim().toUpperCase(Locale.ROOT);
         StockQuoteResponse quote = marketDataService.getQuote(symbol);
         BigDecimal currentPrice = scalePrice(quote.currentPrice());
+        BigDecimal estimatedOrderValue = amount(
+                estimatedPrice(request, currentPrice),
+                request.quantity());
+        if (riskSettingsService != null) {
+            riskSettingsService.validateOrderAgainstRiskControls(
+                    request,
+                    currentUser,
+                    estimatedOrderValue);
+        }
 
         if (shouldExecuteImmediately(request, currentPrice)) {
             Order order = executeImmediateOrder(request, currentUser, quote, currentPrice);
+            logOrderPlaced(order);
             return OrderResponse.from(order, executionMessage(request.side()));
         }
 
         Order pendingOrder = createPendingOrder(request, currentUser, quote, currentPrice);
+        logOrderPlaced(pendingOrder);
         return OrderResponse.from(pendingOrder, "Order created and is pending");
     }
 
@@ -95,7 +123,28 @@ public class OrderService {
 
         releaseReservation(order);
         order.cancel();
+        if (auditLogService != null) {
+            auditLogService.logWithMetadata(
+                    currentUser,
+                    AuditCategory.ORDER,
+                    AuditAction.ORDER_CANCELLED,
+                    "Pending order cancelled",
+                    "{\"orderId\":\"" + order.getId() + "\",\"symbol\":\""
+                            + order.getSymbol() + "\"}");
+        }
         return OrderResponse.from(order, "Pending order cancelled successfully");
+    }
+
+    @Transactional
+    public void cancelPendingOrdersForReset(User currentUser) {
+        List<Order> pendingOrders = orderRepository
+                .findByUserAndStatusOrderByCreatedAtDesc(
+                        currentUser,
+                        OrderStatus.PENDING);
+        for (Order order : pendingOrders) {
+            releaseReservation(order);
+            order.cancel();
+        }
     }
 
     @Transactional
@@ -366,6 +415,16 @@ public class OrderService {
                 order.getExecutedPrice(),
                 order.getTotalAmount(),
                 realizedProfitLoss));
+        if (auditLogService != null) {
+            auditLogService.logWithMetadata(
+                    order.getUser(),
+                    AuditCategory.TRADE,
+                    AuditAction.TRADE_EXECUTED,
+                    "Virtual trade executed",
+                    "{\"orderId\":\"" + order.getId() + "\",\"symbol\":\""
+                            + order.getSymbol() + "\",\"side\":\""
+                            + order.getSide() + "\"}");
+        }
     }
 
     private BigDecimal realizedProfitLoss(
@@ -392,6 +451,30 @@ public class OrderService {
 
     private boolean isPositive(BigDecimal value) {
         return value != null && value.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    private BigDecimal estimatedPrice(
+            CreateOrderRequest request,
+            BigDecimal currentPrice) {
+        return switch (request.orderType()) {
+            case MARKET -> currentPrice;
+            case LIMIT -> request.limitPrice();
+            case STOP_LOSS -> request.stopPrice();
+        };
+    }
+
+    private void logOrderPlaced(Order order) {
+        if (auditLogService == null) {
+            return;
+        }
+        auditLogService.logWithMetadata(
+                order.getUser(),
+                AuditCategory.ORDER,
+                AuditAction.ORDER_PLACED,
+                "Virtual order placed",
+                "{\"orderId\":\"" + order.getId() + "\",\"symbol\":\""
+                        + order.getSymbol() + "\",\"type\":\""
+                        + order.getOrderType() + "\"}");
     }
 
     private String executionMessage(OrderSide side) {

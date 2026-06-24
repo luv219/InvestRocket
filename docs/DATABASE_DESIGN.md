@@ -10,7 +10,7 @@ The backend connects using:
 - `DATABASE_USERNAME`: Neon role
 - `DATABASE_PASSWORD`: Neon password
 
-Flyway owns schema changes. `V5__create_portfolio_snapshots.sql` adds Phase 6 performance history.
+Flyway owns schema changes. `V6__create_profile_risk_and_audit_tables.sql` adds Phase 7 account settings and activity history.
 
 ## Users
 
@@ -126,6 +126,36 @@ Indexes on `(user_id, snapshot_time)` and `(user_id, snapshot_date)` support his
 ## Future Tables
 
 Later phases may add longer-term analytics aggregates if required.
+
+## User Profile Additions
+
+The `users` table now includes nullable `phone_number`, `country`, `profile_image_url`, and `last_login_at` columns plus non-null `preferred_currency` defaulting to `USD`.
+
+## User Risk Settings
+
+| Column | Type | Rules |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `user_id` | `UUID` | Unique owner with cascade delete |
+| `max_order_value` | `NUMERIC(19,2)` | Positive and at most `100000.00` |
+| `max_daily_trades` | `INTEGER` | Between 1 and 200 |
+| `allow_stop_loss_orders` | `BOOLEAN` | Enables stop-loss submission |
+| `allow_limit_orders` | `BOOLEAN` | Enables limit-order submission |
+| `created_at`, `updated_at` | `TIMESTAMPTZ` | UTC timestamps |
+
+## Audit Logs
+
+| Column | Type | Rules |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `user_id` | `UUID` | Owning user |
+| `action`, `category` | `VARCHAR(30)` | Enumerated activity classification |
+| `description` | `VARCHAR(500)` | Non-sensitive event description |
+| `ip_address`, `user_agent` | Text fields | Nullable Phase 7 placeholders |
+| `metadata` | `TEXT` | Non-sensitive event context |
+| `created_at` | `TIMESTAMPTZ` | UTC event time |
+
+Audit logs never store passwords, JWTs, or provider secrets.
 
 ## Data Integrity Principles
 

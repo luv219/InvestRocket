@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from '../layouts/AppLayout'
+import { ActivityPage } from '../pages/ActivityPage'
 import { DashboardPage } from '../pages/DashboardPage'
 import { LandingPage } from '../pages/LandingPage'
 import { LoginPage } from '../pages/LoginPage'
@@ -11,6 +12,7 @@ import { OrdersPage } from '../pages/OrdersPage'
 import { PendingOrdersPage } from '../pages/PendingOrdersPage'
 import { PortfolioPage } from '../pages/PortfolioPage'
 import { RegisterPage } from '../pages/RegisterPage'
+import { SettingsPage } from '../pages/SettingsPage'
 import { StockDetailPage } from '../pages/StockDetailPage'
 import { TradesPage } from '../pages/TradesPage'
 import { WatchlistPage } from '../pages/WatchlistPage'
@@ -52,6 +54,8 @@ export function AppRoutes() {
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/pending" element={<PendingOrdersPage />} />
           <Route path="trades" element={<TradesPage />} />
+          <Route path="activity" element={<ActivityPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

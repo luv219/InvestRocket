@@ -133,6 +133,26 @@ Frontend Recharts Dashboard
 
 Analytics are calculated on the backend with fixed-precision decimal arithmetic. The frontend only visualizes trusted response values. Snapshots preserve portfolio value history, while current holding values use the configured market-data provider. With the default provider, those prices remain simulated mock data.
 
+## Account Safety Flow
+
+```text
+Frontend Settings Page
+  ↓
+UserProfileController / RiskSettingsController
+  ↓
+UserProfileService / RiskSettingsService
+  ↓
+OrderService backend risk validation
+  ↓
+AuditLogService
+  ↓
+ActivityController and Activity Page
+```
+
+Risk controls are enforced before an order reserves virtual cash or shares. The frontend displays settings but is not trusted for enforcement. Passwords, JWTs, and secrets are excluded from audit metadata. Audit persistence uses an isolated best-effort transaction so activity-table failures do not roll back critical account or trading operations.
+
+Simulator reset is transactional and affects only virtual trading state: pending orders are cancelled, current holdings are cleared, wallet balances return to their initial amount, historical orders/trades remain, and an analytics snapshot is created. IP address and User-Agent fields remain nullable placeholders in Phase 7.
+
 ## Data and Infrastructure
 
 Neon PostgreSQL is the development and deployment database. The backend receives a JDBC URL containing `sslmode=require`, username, and password through environment variables. A local PostgreSQL installation is neither required nor assumed.

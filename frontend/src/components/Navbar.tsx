@@ -48,6 +48,12 @@ export function Navbar() {
               <NavLink to="/trades" className={navLinkClass}>
                 Trades
               </NavLink>
+              <NavLink to="/activity" className={navLinkClass}>
+                Activity
+              </NavLink>
+              <NavLink to="/settings" className={navLinkClass}>
+                Settings
+              </NavLink>
               <button
                 type="button"
                 onClick={logout}

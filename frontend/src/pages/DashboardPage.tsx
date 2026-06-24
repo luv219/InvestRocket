@@ -18,6 +18,8 @@ const quickLinks = [
   { to: '/orders', label: 'Orders', description: 'Inspect your simulated order history.' },
   { to: '/orders/pending', label: 'Pending Orders', description: 'Review or cancel advanced orders awaiting triggers.' },
   { to: '/trades', label: 'Trades', description: 'Review executions and realized profit or loss.' },
+  { to: '/activity', label: 'Activity', description: 'Review your account and simulator audit history.' },
+  { to: '/settings', label: 'Settings', description: 'Manage profile, password, risk controls, and simulator reset.' },
 ]
 
 export function DashboardPage() {

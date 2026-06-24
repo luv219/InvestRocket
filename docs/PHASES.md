@@ -70,7 +70,17 @@ Status: complete. The stream is a development/demo simulation and is not exchang
 
 Status: complete. Analytics are calculated by the backend from virtual wallet, holdings, orders, trades, snapshots, and configured market data.
 
-## Phase 7 — Hardening and Delivery
+## Phase 7 — Profile, Risk Controls, and Audit Logs
+
+- User profile and password management
+- Simulator reset with exact confirmation
+- Per-user order value and daily limits
+- Limit and stop-loss permissions
+- Account activity and audit history
+
+Status: complete. Risk controls are enforced by the backend, and simulator reset affects virtual trading state without deleting the user or historical executions.
+
+## Phase 8 — Hardening and Delivery
 
 - Redis quote caching
 - Docker support

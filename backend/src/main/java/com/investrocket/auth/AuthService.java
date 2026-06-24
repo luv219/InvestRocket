@@ -7,7 +7,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.investrocket.audit.AuditAction;
+import com.investrocket.audit.AuditCategory;
+import com.investrocket.audit.AuditLogService;
 import com.investrocket.auth.dto.AuthResponse;
 import com.investrocket.auth.dto.LoginRequest;
 import com.investrocket.auth.dto.RegisterRequest;
@@ -18,6 +22,7 @@ import com.investrocket.exception.PasswordMismatchException;
 import com.investrocket.exception.UserNotFoundException;
 import com.investrocket.user.User;
 import com.investrocket.user.UserRepository;
+import com.investrocket.user.RiskSettingsService;
 import com.investrocket.wallet.Wallet;
 import com.investrocket.wallet.WalletRepository;
 
@@ -29,6 +34,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private RiskSettingsService riskSettingsService;
+    private AuditLogService auditLogService;
 
     public AuthService(
             UserRepository userRepository,
@@ -41,6 +48,16 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+    }
+
+    @Autowired
+    void setRiskSettingsService(RiskSettingsService riskSettingsService) {
+        this.riskSettingsService = riskSettingsService;
+    }
+
+    @Autowired
+    void setAuditLogService(AuditLogService auditLogService) {
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -64,11 +81,21 @@ public class AuthService {
             throw new DuplicateEmailException();
         }
         walletRepository.save(new Wallet(savedUser));
+        if (riskSettingsService != null) {
+            riskSettingsService.createDefaults(savedUser);
+        }
+        if (auditLogService != null) {
+            auditLogService.logWithinCurrentTransaction(
+                    savedUser,
+                    AuditCategory.AUTH,
+                    AuditAction.USER_REGISTERED,
+                    "User account registered");
+        }
 
         return AuthResponse.bearer(jwtService.generateToken(savedUser), UserResponse.from(savedUser));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         String email = normalizeEmail(request.email());
         try {
@@ -80,6 +107,15 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(InvalidCredentialsException::new);
+        user.recordLogin();
+        userRepository.save(user);
+        if (auditLogService != null) {
+            auditLogService.log(
+                    user,
+                    AuditCategory.AUTH,
+                    AuditAction.USER_LOGGED_IN,
+                    "User logged in");
+        }
         return AuthResponse.bearer(jwtService.generateToken(user), UserResponse.from(user));
     }
 

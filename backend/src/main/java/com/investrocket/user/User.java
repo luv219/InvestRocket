@@ -35,6 +35,21 @@ public class User {
     @Column(name = "is_enabled", nullable = false)
     private boolean enabled;
 
+    @Column(name = "phone_number", length = 40)
+    private String phoneNumber;
+
+    @Column(length = 100)
+    private String country;
+
+    @Column(name = "preferred_currency", nullable = false, length = 3)
+    private String preferredCurrency;
+
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
+    @Column(name = "last_login_at")
+    private Instant lastLoginAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -51,6 +66,7 @@ public class User {
         this.passwordHash = passwordHash;
         this.role = Role.USER;
         this.enabled = true;
+        this.preferredCurrency = "USD";
     }
 
     @PrePersist
@@ -95,5 +111,44 @@ public class User {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public String getPreferredCurrency() {
+        return preferredCurrency;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public Instant getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void updateProfile(
+            String fullName,
+            String phoneNumber,
+            String country,
+            String preferredCurrency) {
+        this.fullName = fullName;
+        this.phoneNumber = phoneNumber;
+        this.country = country;
+        this.preferredCurrency = preferredCurrency;
+    }
+
+    public void changePassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public void recordLogin() {
+        this.lastLoginAt = Instant.now();
     }
 }

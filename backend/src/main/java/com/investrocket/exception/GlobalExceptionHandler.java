@@ -39,10 +39,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PasswordMismatchException.class)
     public ResponseEntity<ErrorResponse> handlePasswordMismatch(PasswordMismatchException exception) {
+        String field = exception.getMessage().startsWith("New password")
+                ? "confirmNewPassword"
+                : "confirmPassword";
         return ResponseEntity.badRequest().body(new ErrorResponse(
                 false,
                 "Validation failed",
-                Map.of("confirmPassword", exception.getMessage()),
+                Map.of(field, exception.getMessage()),
                 Instant.now()));
     }
 
@@ -151,7 +154,11 @@ public class GlobalExceptionHandler {
             InsufficientHoldingsException.class,
             UnsupportedOrderTypeException.class,
             InvalidOrderRequestException.class,
-            OrderCancellationException.class
+            OrderCancellationException.class,
+            RiskControlViolationException.class,
+            InvalidCurrentPasswordException.class,
+            InvalidResetConfirmationException.class,
+            InvalidAuditCategoryException.class
     })
     public ResponseEntity<ErrorResponse> handleTradingRequest(RuntimeException exception) {
         return ResponseEntity.badRequest().body(new ErrorResponse(

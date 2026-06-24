@@ -31,6 +31,7 @@ import com.investrocket.portfolio.HoldingRepository;
 import com.investrocket.trade.Trade;
 import com.investrocket.trade.TradeRepository;
 import com.investrocket.user.User;
+import com.investrocket.user.RiskSettingsService;
 import com.investrocket.wallet.Wallet;
 import com.investrocket.wallet.WalletRepository;
 
@@ -52,6 +53,9 @@ class OrderServiceTest {
     @Mock
     private MarketDataService marketDataService;
 
+    @Mock
+    private RiskSettingsService riskSettingsService;
+
     private OrderService orderService;
     private User user;
     private Wallet wallet;
@@ -64,8 +68,28 @@ class OrderServiceTest {
                 holdingRepository,
                 walletRepository,
                 marketDataService);
+        orderService.setRiskSettingsService(riskSettingsService);
         user = new User("Demo User", "demo@example.com", "hashed-password");
         wallet = new Wallet(user);
+    }
+
+    @Test
+    void validatesEstimatedOrderValueAgainstRiskSettings() {
+        when(marketDataService.getQuote("AAPL")).thenReturn(quote("AAPL", "195.25"));
+        when(walletRepository.findForUpdateByUser(user)).thenReturn(Optional.of(wallet));
+        when(holdingRepository.findForUpdateByUserAndSymbol(user, "AAPL"))
+                .thenReturn(Optional.empty());
+        when(orderRepository.save(any(Order.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        CreateOrderRequest request =
+                request("AAPL", OrderSide.BUY, OrderType.MARKET, 2, null, null);
+        orderService.placeOrder(request, user);
+
+        verify(riskSettingsService).validateOrderAgainstRiskControls(
+                request,
+                user,
+                new BigDecimal("390.50"));
     }
 
     @Test

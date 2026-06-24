@@ -7,7 +7,11 @@ import java.util.regex.Pattern;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.investrocket.audit.AuditAction;
+import com.investrocket.audit.AuditCategory;
+import com.investrocket.audit.AuditLogService;
 import com.investrocket.exception.DuplicateWatchlistItemException;
 import com.investrocket.exception.InvalidMarketDataRequestException;
 import com.investrocket.exception.WatchlistItemNotFoundException;
@@ -24,12 +28,18 @@ public class WatchlistService {
 
     private final WatchlistRepository watchlistRepository;
     private final MarketDataService marketDataService;
+    private AuditLogService auditLogService;
 
     public WatchlistService(
             WatchlistRepository watchlistRepository,
             MarketDataService marketDataService) {
         this.watchlistRepository = watchlistRepository;
         this.marketDataService = marketDataService;
+    }
+
+    @Autowired
+    void setAuditLogService(AuditLogService auditLogService) {
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -52,7 +62,15 @@ public class WatchlistService {
                 searchResult == null ? null : searchResult.exchange(),
                 quote.currency());
         try {
-            return toResponse(watchlistRepository.saveAndFlush(item), quote);
+            WatchlistItem savedItem = watchlistRepository.saveAndFlush(item);
+            if (auditLogService != null) {
+                auditLogService.log(
+                        currentUser,
+                        AuditCategory.WATCHLIST,
+                        AuditAction.WATCHLIST_ADDED,
+                        normalizedSymbol + " added to watchlist");
+            }
+            return toResponse(savedItem, quote);
         } catch (DataIntegrityViolationException exception) {
             throw new DuplicateWatchlistItemException(normalizedSymbol);
         }
@@ -75,6 +93,13 @@ public class WatchlistService {
                 .findByUserAndSymbol(currentUser, normalizedSymbol)
                 .orElseThrow(() -> new WatchlistItemNotFoundException(normalizedSymbol));
         watchlistRepository.delete(item);
+        if (auditLogService != null) {
+            auditLogService.log(
+                    currentUser,
+                    AuditCategory.WATCHLIST,
+                    AuditAction.WATCHLIST_REMOVED,
+                    normalizedSymbol + " removed from watchlist");
+        }
     }
 
     private String normalize(String symbol) {

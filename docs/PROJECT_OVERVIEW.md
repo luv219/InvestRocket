@@ -26,6 +26,9 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 - WebSocket/STOMP demo price updates on watchlist and stock-detail pages
 - Portfolio snapshots, performance history, allocation, and trading statistics
 - Protected Recharts analytics dashboard
+- User-managed profile and password settings
+- Backend-enforced trading risk controls
+- Simulator reset and per-user activity history
 
 ## Intended Users
 
@@ -42,6 +45,8 @@ Users can place market, limit, and stop-loss sell orders. Pending orders are eva
 Watchlist prices now update through a backend-generated demo stream. These values are simulated, are not persisted, and are not licensed exchange data.
 
 Users can now review total return, realized and unrealized profit or loss, best and worst holdings, allocation, trading statistics, and historical portfolio snapshots.
+
+Users can also update profile settings, change their password, configure order safety limits, inspect account activity, and reset virtual trading state without deleting their account.
 
 ## Constraints
 

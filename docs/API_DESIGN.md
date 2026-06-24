@@ -379,3 +379,76 @@ Performance point:
   "dailyProfitLossPercent": 0.24
 }
 ```
+
+## Profile and Settings
+
+All endpoints require JWT authentication and never accept a user ID.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/profile` | Current profile |
+| `PUT` | `/api/profile` | Update profile fields |
+| `PUT` | `/api/profile/password` | Change password |
+| `POST` | `/api/profile/reset-simulator` | Reset virtual trading state |
+| `GET` | `/api/profile/risk-settings` | Current risk settings |
+| `PUT` | `/api/profile/risk-settings` | Update risk settings |
+
+Profile update:
+
+```json
+{
+  "fullName": "Demo User",
+  "phoneNumber": "+1 555 0100",
+  "country": "United States",
+  "preferredCurrency": "USD"
+}
+```
+
+Password change:
+
+```json
+{
+  "currentPassword": "Password123",
+  "newPassword": "Password456",
+  "confirmNewPassword": "Password456"
+}
+```
+
+Simulator reset:
+
+```json
+{
+  "confirmText": "RESET MY SIMULATOR"
+}
+```
+
+Risk settings:
+
+```json
+{
+  "maxOrderValue": 25000.00,
+  "maxDailyTrades": 50,
+  "allowStopLossOrders": true,
+  "allowLimitOrders": true
+}
+```
+
+Order value, UTC daily order count, and order-type permissions are validated on the backend before execution or reservation.
+
+## Activity
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/activity` | All current-user activity |
+| `GET` | `/api/activity?category=ORDER` | Activity filtered by category |
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "category": "ORDER",
+  "action": "ORDER_PLACED",
+  "description": "Virtual order placed",
+  "metadata": "{\"symbol\":\"AAPL\"}",
+  "createdAt": "2026-06-25T12:00:00Z"
+}
+```
