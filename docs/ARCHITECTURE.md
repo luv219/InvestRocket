@@ -28,9 +28,10 @@ Invest Rocket is a simulator. No component will connect to a brokerage or execut
 
 - `auth`, `user`, `wallet`: identity and virtual funding in Phase 1
 - `marketdata`: provider abstraction, search, and quote retrieval in Phase 2
-- `watchlist`: reserved for a later phase
+- `watchlist`: authenticated per-user symbol tracking
+- `websocket`: live demo price generation and STOMP broadcasting
 - `portfolio`, `order`, `trade`: simulated execution and positions in Phase 3
-- `analytics`: performance calculations in Phase 4
+- `analytics`: reserved for performance calculations in Phase 6
 - `config`, `common`, `exception`: cross-cutting infrastructure
 
 ## Market Data Flow
@@ -92,6 +93,26 @@ Transactional Wallet + Holding + Order + Trade update
 The processor re-locks and re-checks each order’s status before execution, preventing duplicate trades when runs overlap. Market and trigger prices are evaluated on the backend. Pending limit buys reserve virtual cash; pending limit and stop-loss sells lock shares. Cancellation reverses the reservation.
 
 This remains simulated execution, not brokerage routing or real-money trading.
+
+## Live Price Flow
+
+```text
+MockLivePriceGenerator
+  ↓
+LivePriceService (in-memory latest-price map)
+  ↓
+PriceBroadcastService
+  ↓
+Spring WebSocket/STOMP simple broker
+  ↓
+Frontend livePriceClient and useLivePrices
+  ↓
+Watchlist and Stock Detail UI
+```
+
+The mock stream is explicitly for development and demonstrations. Financial provider credentials remain backend-only, and browsers subscribe to Invest Rocket rather than directly to a provider. `MarketDataService` overlays the latest generated price, so pending-order checks and REST quotes use the same in-memory demo value.
+
+The simple broker supports the current single-instance architecture. Redis pub/sub may be added later for horizontally scaled deployments.
 
 ## Data and Infrastructure
 

@@ -32,8 +32,6 @@ Status: complete. JWTs are stored in `localStorage` for development; production 
 
 Status: complete. The mock provider is the default; Finnhub can be selected with backend environment variables.
 
-Watchlists remain deferred.
-
 ## Phase 3 — Simulated Trading
 
 - Portfolios and positions
@@ -53,14 +51,24 @@ Status: complete. Phase 3 supports whole-share `MARKET` orders only, weighted-av
 
 Status: complete.
 
-## Phase 5 — Analytics
+## Phase 5 — Watchlist and Live Price Updates
+
+- Per-user watchlist management
+- JWT-protected add, list, and remove endpoints
+- Spring WebSocket/STOMP broker
+- In-memory mock live-price generation
+- Live watchlist and stock-detail updates
+
+Status: complete. The stream is a development/demo simulation and is not exchange-grade real-time data. Redis pub/sub remains deferred.
+
+## Phase 6 — Analytics
 
 - Portfolio valuation history and returns
 - Performance history
 - Recharts visualizations
 - Dashboard analytics
 
-## Phase 6 — Hardening and Delivery
+## Phase 7 — Hardening and Delivery
 
 - Redis quote caching
 - Docker support

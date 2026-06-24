@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.investrocket.exception.InvalidMarketDataRequestException;
 import com.investrocket.marketdata.dto.StockQuoteResponse;
 import com.investrocket.marketdata.dto.StockSearchResult;
+import com.investrocket.websocket.LivePriceService;
 
 @ExtendWith(MockitoExtension.class)
 class MarketDataServiceTest {
@@ -26,7 +27,8 @@ class MarketDataServiceTest {
 
     @Test
     void trimsSearchQuery() {
-        MarketDataService service = new MarketDataService(marketDataProvider);
+        MarketDataService service =
+                new MarketDataService(marketDataProvider, new LivePriceService());
         List<StockSearchResult> expected = List.of(
                 new StockSearchResult("AAPL", "Apple Inc.", "NASDAQ", "USD", "Common Stock"));
         when(marketDataProvider.searchStocks("aapl")).thenReturn(expected);
@@ -37,7 +39,8 @@ class MarketDataServiceTest {
 
     @Test
     void normalizesQuoteSymbol() {
-        MarketDataService service = new MarketDataService(marketDataProvider);
+        MarketDataService service =
+                new MarketDataService(marketDataProvider, new LivePriceService());
         StockQuoteResponse expected = new StockQuoteResponse(
                 "AAPL", "Apple Inc.", new BigDecimal("195.25"),
                 BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
@@ -50,7 +53,8 @@ class MarketDataServiceTest {
 
     @Test
     void rejectsBlankSearchQuery() {
-        MarketDataService service = new MarketDataService(marketDataProvider);
+        MarketDataService service =
+                new MarketDataService(marketDataProvider, new LivePriceService());
 
         assertThatThrownBy(() -> service.searchStocks(" "))
                 .isInstanceOf(InvalidMarketDataRequestException.class)
@@ -59,7 +63,8 @@ class MarketDataServiceTest {
 
     @Test
     void rejectsInvalidSymbol() {
-        MarketDataService service = new MarketDataService(marketDataProvider);
+        MarketDataService service =
+                new MarketDataService(marketDataProvider, new LivePriceService());
 
         assertThatThrownBy(() -> service.getQuote("BAD SYMBOL"))
                 .isInstanceOf(InvalidMarketDataRequestException.class)

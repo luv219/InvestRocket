@@ -43,6 +43,8 @@ public class SecurityConfig {
                                 "/api/health",
                                 "/api/auth/register",
                                 "/api/auth/login",
+                                "/ws",
+                                "/ws/**",
                                 "/actuator/health")
                         .permitAll()
                         .anyRequest()

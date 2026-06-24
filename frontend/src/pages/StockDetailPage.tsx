@@ -4,7 +4,13 @@ import { Link, useParams } from 'react-router-dom'
 import { MarketStatCard } from '../components/MarketStatCard'
 import { getMarketErrorMessage } from '../features/market/marketErrors'
 import { getQuote } from '../features/market/marketService'
+import { useLivePrices } from '../features/live/useLivePrices'
 import { placeOrder } from '../features/orders/orderService'
+import {
+  addToWatchlist,
+  getWatchlist,
+  removeFromWatchlist,
+} from '../features/watchlist/watchlistService'
 import type { StockQuote } from '../types/market'
 import type { Order, OrderSide, OrderType } from '../types/order'
 import { getApiErrorMessage } from '../utils/apiError'
@@ -41,6 +47,10 @@ export function StockDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderError, setOrderError] = useState('')
   const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null)
+  const [isWatched, setIsWatched] = useState(false)
+  const [isUpdatingWatchlist, setIsUpdatingWatchlist] = useState(false)
+  const [watchlistMessage, setWatchlistMessage] = useState('')
+  const livePrices = useLivePrices()
 
   useEffect(() => {
     async function loadQuote() {
@@ -56,6 +66,39 @@ export function StockDetailPage() {
     }
     void loadQuote()
   }, [symbol])
+
+  useEffect(() => {
+    getWatchlist()
+      .then((items) =>
+        setIsWatched(
+          items.some((item) => item.symbol === symbol.toUpperCase()),
+        ),
+      )
+      .catch(() => setIsWatched(false))
+  }, [symbol])
+
+  async function handleWatchlistToggle() {
+    const normalizedSymbol = symbol.toUpperCase()
+    setIsUpdatingWatchlist(true)
+    setWatchlistMessage('')
+    try {
+      if (isWatched) {
+        await removeFromWatchlist(normalizedSymbol)
+        setIsWatched(false)
+        setWatchlistMessage(`${normalizedSymbol} removed from watchlist`)
+      } else {
+        await addToWatchlist({ symbol: normalizedSymbol })
+        setIsWatched(true)
+        setWatchlistMessage(`${normalizedSymbol} added to watchlist`)
+      }
+    } catch (requestError) {
+      setWatchlistMessage(
+        getApiErrorMessage(requestError, 'Unable to update watchlist'),
+      )
+    } finally {
+      setIsUpdatingWatchlist(false)
+    }
+  }
 
   function handleOrderTypeChange(type: OrderType) {
     setOrderType(type)
@@ -130,12 +173,23 @@ export function StockDetailPage() {
     )
   }
 
+  const livePrice = livePrices[quote.symbol]
+  const displayedQuote = livePrice
+    ? {
+        ...quote,
+        currentPrice: livePrice.currentPrice,
+        changeAmount: livePrice.changeAmount,
+        changePercent: livePrice.changePercent,
+        latestTradingTime: livePrice.latestTradingTime,
+        provider: livePrice.provider,
+      }
+    : quote
   const referencePrice =
     orderType === 'LIMIT'
       ? Number(limitPrice) || 0
       : orderType === 'STOP_LOSS'
         ? Number(stopPrice) || 0
-        : quote.currentPrice
+        : displayedQuote.currentPrice
   const buttonLabel =
     orderType === 'MARKET'
       ? 'Place Market Order'
@@ -155,28 +209,48 @@ export function StockDetailPage() {
       <section className="mt-6 grid gap-6 rounded-3xl border border-slate-800 bg-slate-900/70 p-8 md:grid-cols-[1fr_auto] md:items-center">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rocket-400">
-            {quote.symbol}
+            {displayedQuote.symbol}
           </p>
           <h1 className="mt-3 text-4xl font-bold text-white">
-            {quote.companyName}
+            {displayedQuote.companyName}
           </h1>
           <p className="mt-3 text-sm text-slate-500">
-            Provider: {quote.provider}
+            Provider: {displayedQuote.provider}
           </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={isUpdatingWatchlist}
+              onClick={() => void handleWatchlistToggle()}
+              className="rounded-lg border border-rocket-500/40 px-4 py-2 text-sm font-semibold text-rocket-300 hover:bg-rocket-500/10 disabled:opacity-60"
+            >
+              {isUpdatingWatchlist
+                ? 'Updating...'
+                : isWatched
+                  ? 'Remove from Watchlist'
+                  : 'Add to Watchlist'}
+            </button>
+            <span className="text-xs font-semibold text-rocket-300">
+              ● Live demo price updates enabled
+            </span>
+          </div>
+          {watchlistMessage && (
+            <p className="mt-3 text-sm text-slate-300">{watchlistMessage}</p>
+          )}
         </div>
         <div className="md:text-right">
           <p className="text-4xl font-bold text-white">
-            {formatMoney(quote.currentPrice, quote.currency)}
+            {formatMoney(displayedQuote.currentPrice, displayedQuote.currency)}
           </p>
           <p
             className={`mt-2 font-semibold ${
-              (quote.changeAmount ?? 0) >= 0
+              (displayedQuote.changeAmount ?? 0) >= 0
                 ? 'text-rocket-400'
                 : 'text-red-400'
             }`}
           >
-            {formatChange(quote.changeAmount)} (
-            {formatChange(quote.changePercent, '%')})
+            {formatChange(displayedQuote.changeAmount)} (
+            {formatChange(displayedQuote.changePercent, '%')})
           </p>
         </div>
       </section>
@@ -184,30 +258,30 @@ export function StockDetailPage() {
       <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MarketStatCard
           label="Open"
-          value={formatMoney(quote.openPrice, quote.currency)}
+          value={formatMoney(displayedQuote.openPrice, displayedQuote.currency)}
         />
         <MarketStatCard
           label="High"
-          value={formatMoney(quote.highPrice, quote.currency)}
+          value={formatMoney(displayedQuote.highPrice, displayedQuote.currency)}
         />
         <MarketStatCard
           label="Low"
-          value={formatMoney(quote.lowPrice, quote.currency)}
+          value={formatMoney(displayedQuote.lowPrice, displayedQuote.currency)}
         />
         <MarketStatCard
           label="Previous close"
-          value={formatMoney(quote.previousClose, quote.currency)}
+          value={formatMoney(displayedQuote.previousClose, displayedQuote.currency)}
         />
-        <MarketStatCard label="Volume" value={formatNumber(quote.volume)} />
+        <MarketStatCard label="Volume" value={formatNumber(displayedQuote.volume)} />
         <MarketStatCard
           label="Latest trading time"
-          value={new Date(quote.latestTradingTime).toLocaleString()}
+          value={new Date(displayedQuote.latestTradingTime).toLocaleString()}
         />
         <MarketStatCard
           label="Currency"
-          value={quote.currency ?? 'Unavailable'}
+          value={displayedQuote.currency ?? 'Unavailable'}
         />
-        <MarketStatCard label="Provider" value={quote.provider} />
+        <MarketStatCard label="Provider" value={displayedQuote.provider} />
       </section>
 
       <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
@@ -310,7 +384,7 @@ export function StockDetailPage() {
             <p className="mt-2 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 font-semibold text-white">
               {formatMoney(
                 referencePrice * Math.max(quantity, 0),
-                quote.currency,
+                displayedQuote.currency,
               )}
             </p>
           </div>

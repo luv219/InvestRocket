@@ -22,6 +22,8 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 - Portfolio holdings, wallet valuation, order history, and trade history
 - Limit orders, stop-loss sells, pending orders, and cancellation
 - Reserved virtual cash and locked holding quantities
+- Personal watchlists owned by the authenticated user
+- WebSocket/STOMP demo price updates on watchlist and stock-detail pages
 
 ## Intended Users
 
@@ -35,7 +37,9 @@ Authenticated users can search stocks, view quotes, and place virtual whole-shar
 
 Users can place market, limit, and stop-loss sell orders. Pending orders are evaluated by a scheduled processor and can be cancelled before execution. Every operation remains virtual and simulated.
 
-Later phases may add watchlists, historical snapshots, and analytics.
+Watchlist prices now update through a backend-generated demo stream. These values are simulated, are not persisted, and are not licensed exchange data.
+
+Later phases may add historical snapshots and analytics.
 
 ## Constraints
 

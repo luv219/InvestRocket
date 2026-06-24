@@ -4,11 +4,11 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 4 Status
+## Phase 5 Status
 
-Phase 4 adds advanced simulated order types: limit buys, limit sells, and stop-loss sells. Orders execute immediately when their trigger already matches or remain pending for the scheduled processor.
+Phase 5 adds personal watchlists and a WebSocket/STOMP live-price foundation. Authenticated users can add, list, and remove symbols, while the default mock provider broadcasts small demo price movements every five seconds.
 
-Pending limit buys reserve virtual cash, while pending limit and stop-loss sells lock owned shares. Cancellation releases those reservations. Partial fills, real-time pushes, and brokerage execution remain outside this phase.
+The stream is for development and demonstrations only. It is not licensed exchange data, is not persisted, and must not be interpreted as real-time market information.
 
 ## Tech Stack
 
@@ -19,7 +19,8 @@ Pending limit buys reserve virtual cash, while pending limit and stop-loss sells
 - Market data: Provider abstraction with mock and Finnhub implementations
 - Trading: Transactional simulated market orders, holdings, orders, and trades
 - Advanced orders: Pending lifecycle, reservation, cancellation, and scheduled triggers
-- Planned: TanStack Query, Redis, Recharts, and Docker
+- Live updates: Spring WebSocket/STOMP, in-memory demo prices, and React STOMP client
+- Planned: TanStack Query, Redis pub/sub, Recharts, and Docker
 
 ## Planned Features
 
@@ -32,7 +33,8 @@ Pending limit buys reserve virtual cash, while pending limit and stop-loss sells
 - Pending order cancellation and processing — complete
 - Portfolio holdings and valuation — complete
 - Order and trade history — complete
-- Watchlists and analytics dashboards
+- Personal watchlists with live demo prices — complete
+- Analytics dashboards
 
 ## Project Structure
 
@@ -72,6 +74,8 @@ Required backend variables:
 | `FINANCIAL_API_KEY` | Required only for the Finnhub provider |
 | `PENDING_ORDER_PROCESSOR_ENABLED` | Enables scheduled pending-order checks |
 | `PENDING_ORDER_PROCESSOR_INTERVAL_MS` | Delay between checks; defaults to `30000` |
+| `LIVE_PRICE_STREAM_ENABLED` | Enables the mock WebSocket price generator |
+| `LIVE_PRICE_STREAM_INTERVAL_MS` | Delay between mock broadcasts; defaults to `5000` |
 
 PowerShell example for the current terminal:
 
@@ -85,12 +89,15 @@ $env:FRONTEND_URL="http://localhost:5173"
 $env:FINANCIAL_API_PROVIDER="mock"
 $env:PENDING_ORDER_PROCESSOR_ENABLED="true"
 $env:PENDING_ORDER_PROCESSOR_INTERVAL_MS="30000"
+$env:LIVE_PRICE_STREAM_ENABLED="true"
+$env:LIVE_PRICE_STREAM_INTERVAL_MS="5000"
 ```
 
 Create `frontend/.env` from `frontend/.env.example` to configure the browser API URL:
 
 ```text
 VITE_API_BASE_URL=http://localhost:8080/api
+VITE_WS_BASE_URL=ws://localhost:8080/ws
 ```
 
 ## Neon PostgreSQL
@@ -125,7 +132,7 @@ Expected response:
 }
 ```
 
-Flyway automatically applies `V1__create_users_and_wallets.sql` to the configured Neon database at startup.
+Flyway automatically applies all migrations through `V4__create_watchlist_items.sql` to the configured Neon database at startup.
 
 ## Run the Frontend
 
@@ -212,11 +219,30 @@ Limit buy example:
 }
 ```
 
+## Watchlist and Live Prices
+
+All watchlist endpoints require `Authorization: Bearer <accessToken>`. User identity is resolved from the JWT; the frontend never submits a user ID.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/watchlist` | List the current user’s enriched watchlist |
+| `POST` | `/api/watchlist` | Add one symbol |
+| `DELETE` | `/api/watchlist/{symbol}` | Remove one owned symbol |
+
+WebSocket/STOMP configuration:
+
+- Endpoint: `ws://localhost:8080/ws`
+- General topic: `/topic/prices`
+- Symbol topic: `/topic/prices/{symbol}`
+- Allowed browser origin: `FRONTEND_URL`
+
+The mock generator broadcasts AAPL, MSFT, TSLA, AMZN, GOOGL, NVDA, and META. Provider API keys remain backend-only. Redis pub/sub is deferred.
+
 ## Development Commit
 
 ```bash
 git add .
-git commit -m "feat: implement phase 4 advanced order types"
+git commit -m "feat: implement phase 5 watchlist and live price updates"
 ```
 
 ## Roadmap
@@ -226,9 +252,9 @@ git commit -m "feat: implement phase 4 advanced order types"
 - Phase 2: Market-data provider foundation, stock search, and quotes — complete
 - Phase 3: Transactional market orders, holdings, portfolio, orders, and trades — complete
 - Phase 4: Limit orders, stop-loss sells, pending processing, and cancellation — complete
-- Future: Watchlists
-- Phase 5: Portfolio performance analytics and charts
-- Phase 6: Redis caching, Docker support, testing, and deployment hardening
+- Phase 5: Watchlists and live demo price updates — complete
+- Phase 6: Portfolio performance analytics and charts
+- Phase 7: Redis caching, Docker support, testing, and deployment hardening
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 

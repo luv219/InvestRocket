@@ -12,6 +12,7 @@ import { PortfolioPage } from '../pages/PortfolioPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { StockDetailPage } from '../pages/StockDetailPage'
 import { TradesPage } from '../pages/TradesPage'
+import { WatchlistPage } from '../pages/WatchlistPage'
 import { ProtectedRoute } from './ProtectedRoute'
 
 export function AppRoutes() {
@@ -25,6 +26,7 @@ export function AppRoutes() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="market" element={<MarketPage />} />
           <Route path="market/:symbol" element={<StockDetailPage />} />
+          <Route path="watchlist" element={<WatchlistPage />} />
           <Route path="portfolio" element={<PortfolioPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/pending" element={<PendingOrdersPage />} />

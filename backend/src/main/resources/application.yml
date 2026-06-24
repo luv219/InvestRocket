@@ -34,6 +34,9 @@ app:
   pending-order-processor:
     enabled: ${PENDING_ORDER_PROCESSOR_ENABLED:true}
     interval-ms: ${PENDING_ORDER_PROCESSOR_INTERVAL_MS:30000}
+  live-price-stream:
+    enabled: ${LIVE_PRICE_STREAM_ENABLED:true}
+    interval-ms: ${LIVE_PRICE_STREAM_INTERVAL_MS:5000}
 
 management:
   endpoints:

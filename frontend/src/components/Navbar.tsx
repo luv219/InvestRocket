@@ -30,6 +30,9 @@ export function Navbar() {
               <NavLink to="/market" className={navLinkClass}>
                 Market
               </NavLink>
+              <NavLink to="/watchlist" className={navLinkClass}>
+                Watchlist
+              </NavLink>
               <NavLink to="/portfolio" className={navLinkClass}>
                 Portfolio
               </NavLink>

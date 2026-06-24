@@ -55,6 +55,16 @@ public class GlobalExceptionHandler {
                 Instant.now()));
     }
 
+    @ExceptionHandler(DuplicateWatchlistItemException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateWatchlistItem(
+            DuplicateWatchlistItemException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
+                false,
+                exception.getMessage(),
+                Map.of("symbol", exception.getMessage()),
+                Instant.now()));
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException exception) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(
@@ -153,6 +163,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+                false,
+                exception.getMessage(),
+                Map.of(),
+                Instant.now()));
+    }
+
+    @ExceptionHandler(WatchlistItemNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleWatchlistItemNotFound(
+            WatchlistItemNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
                 false,
                 exception.getMessage(),

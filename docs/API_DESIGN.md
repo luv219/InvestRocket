@@ -274,11 +274,67 @@ Validation example:
 
 Duplicate email returns `409 Conflict`, invalid credentials and missing authentication return `401 Unauthorized`, and malformed request data returns `400 Bad Request`.
 
+## Watchlist
+
+All watchlist endpoints require a valid bearer token. The authenticated user is derived from the JWT principal.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/watchlist` | Return the current user’s watchlist with latest quotes |
+| `POST` | `/api/watchlist` | Add a normalized symbol |
+| `DELETE` | `/api/watchlist/{symbol}` | Remove an owned symbol |
+
+Request:
+
+```json
+{
+  "symbol": "AAPL"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Stock added to watchlist",
+  "data": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "symbol": "AAPL",
+    "companyName": "Apple Inc.",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "currentPrice": 195.25,
+    "changeAmount": 1.45,
+    "changePercent": 0.75,
+    "latestTradingTime": "2026-06-24T16:00:00Z",
+    "createdAt": "2026-06-24T10:00:00Z"
+  },
+  "timestamp": "2026-06-24T16:00:00Z"
+}
+```
+
+## Live Price WebSocket
+
+- Endpoint: `/ws`
+- General STOMP topic: `/topic/prices`
+- Symbol STOMP topic: `/topic/prices/{symbol}`
+
+```json
+{
+  "symbol": "AAPL",
+  "currentPrice": 195.31,
+  "changeAmount": 1.51,
+  "changePercent": 0.78,
+  "latestTradingTime": "2026-06-24T16:00:05Z",
+  "provider": "mock-live"
+}
+```
+
 ## Planned Resources
 
 | Phase | Resource area | Example path |
 | --- | --- | --- |
-| Future | Watchlists | `/api/watchlists` |
-| 4 | Analytics | `/api/analytics/portfolio` |
+| Future | Analytics | `/api/analytics/portfolio` |
 
-These future paths are architectural proposals, not Phase 2 implementations.
+These future paths are architectural proposals and are not part of Phase 5.

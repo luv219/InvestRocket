@@ -10,7 +10,7 @@ The backend connects using:
 - `DATABASE_USERNAME`: Neon role
 - `DATABASE_PASSWORD`: Neon password
 
-Flyway owns schema changes. `V3__add_advanced_order_fields.sql` adds Phase 4 reservations, locks, trigger prices, and cancellation metadata.
+Flyway owns schema changes. `V4__create_watchlist_items.sql` adds Phase 5 per-user watchlists and uniqueness constraints.
 
 ## Users
 
@@ -92,9 +92,23 @@ Each successful order creates one immutable trade.
 | `realized_profit_loss` | `NUMERIC(19,2)` | Zero for buys; average-cost result for sells |
 | `executed_at` | `TIMESTAMPTZ` | UTC execution time |
 
+## Watchlist Items
+
+| Column | Type | Rules |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `user_id` | `UUID` | Owner; foreign key to `users` with cascade delete |
+| `symbol` | `VARCHAR(15)` | Uppercase stock symbol |
+| `company_name` | `VARCHAR(200)` | Display metadata captured when added |
+| `exchange` | `VARCHAR(80)` | Nullable provider metadata |
+| `currency` | `VARCHAR(3)` | Quote currency |
+| `created_at` | `TIMESTAMPTZ` | UTC creation time |
+
+`user_id + symbol` is unique. Live price ticks remain in memory and are not persisted.
+
 ## Future Tables
 
-Later phases may add watchlists and portfolio snapshots.
+Later phases may add portfolio snapshots and analytics history.
 
 ## Data Integrity Principles
 
