@@ -31,7 +31,7 @@ Invest Rocket is a simulator. No component will connect to a brokerage or execut
 - `watchlist`: authenticated per-user symbol tracking
 - `websocket`: live demo price generation and STOMP broadcasting
 - `portfolio`, `order`, `trade`: simulated execution and positions in Phase 3
-- `analytics`: reserved for performance calculations in Phase 6
+- `analytics`: portfolio calculations, snapshots, and trading statistics
 - `config`, `common`, `exception`: cross-cutting infrastructure
 
 ## Market Data Flow
@@ -113,6 +113,25 @@ Watchlist and Stock Detail UI
 The mock stream is explicitly for development and demonstrations. Financial provider credentials remain backend-only, and browsers subscribe to Invest Rocket rather than directly to a provider. `MarketDataService` overlays the latest generated price, so pending-order checks and REST quotes use the same in-memory demo value.
 
 The simple broker supports the current single-instance architecture. Redis pub/sub may be added later for horizontally scaled deployments.
+
+## Analytics Flow
+
+```text
+Trades + Holdings + Wallet + MarketData
+  ↓
+PortfolioService
+  ↓
+AnalyticsService
+  ├── current allocation and P/L
+  ├── order and trade statistics
+  └── PortfolioSnapshot persistence
+  ↓
+PortfolioSnapshotScheduler + AnalyticsController
+  ↓
+Frontend Recharts Dashboard
+```
+
+Analytics are calculated on the backend with fixed-precision decimal arithmetic. The frontend only visualizes trusted response values. Snapshots preserve portfolio value history, while current holding values use the configured market-data provider. With the default provider, those prices remain simulated mock data.
 
 ## Data and Infrastructure
 

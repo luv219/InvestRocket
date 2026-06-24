@@ -4,11 +4,11 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 5 Status
+## Phase 6 Status
 
-Phase 5 adds personal watchlists and a WebSocket/STOMP live-price foundation. Authenticated users can add, list, and remove symbols, while the default mock provider broadcasts small demo price movements every five seconds.
+Phase 6 adds backend-calculated portfolio analytics, persisted performance snapshots, allocation and holding analysis, trading statistics, and a protected Recharts dashboard.
 
-The stream is for development and demonstrations only. It is not licensed exchange data, is not persisted, and must not be interpreted as real-time market information.
+All balances, returns, and charts remain based on simulated trading and the configured market-data provider.
 
 ## Tech Stack
 
@@ -20,7 +20,8 @@ The stream is for development and demonstrations only. It is not licensed exchan
 - Trading: Transactional simulated market orders, holdings, orders, and trades
 - Advanced orders: Pending lifecycle, reservation, cancellation, and scheduled triggers
 - Live updates: Spring WebSocket/STOMP, in-memory demo prices, and React STOMP client
-- Planned: TanStack Query, Redis pub/sub, Recharts, and Docker
+- Analytics: Portfolio snapshots, P/L metrics, allocation, trading statistics, and Recharts
+- Planned: TanStack Query, Redis pub/sub, and Docker
 
 ## Planned Features
 
@@ -34,7 +35,7 @@ The stream is for development and demonstrations only. It is not licensed exchan
 - Portfolio holdings and valuation — complete
 - Order and trade history — complete
 - Personal watchlists with live demo prices — complete
-- Analytics dashboards
+- Portfolio analytics and performance dashboard — complete
 
 ## Project Structure
 
@@ -76,6 +77,8 @@ Required backend variables:
 | `PENDING_ORDER_PROCESSOR_INTERVAL_MS` | Delay between checks; defaults to `30000` |
 | `LIVE_PRICE_STREAM_ENABLED` | Enables the mock WebSocket price generator |
 | `LIVE_PRICE_STREAM_INTERVAL_MS` | Delay between mock broadcasts; defaults to `5000` |
+| `PORTFOLIO_SNAPSHOT_ENABLED` | Enables scheduled portfolio snapshots |
+| `PORTFOLIO_SNAPSHOT_INTERVAL_MS` | Snapshot interval; defaults to `300000` |
 
 PowerShell example for the current terminal:
 
@@ -91,6 +94,8 @@ $env:PENDING_ORDER_PROCESSOR_ENABLED="true"
 $env:PENDING_ORDER_PROCESSOR_INTERVAL_MS="30000"
 $env:LIVE_PRICE_STREAM_ENABLED="true"
 $env:LIVE_PRICE_STREAM_INTERVAL_MS="5000"
+$env:PORTFOLIO_SNAPSHOT_ENABLED="true"
+$env:PORTFOLIO_SNAPSHOT_INTERVAL_MS="300000"
 ```
 
 Create `frontend/.env` from `frontend/.env.example` to configure the browser API URL:
@@ -132,7 +137,7 @@ Expected response:
 }
 ```
 
-Flyway automatically applies all migrations through `V4__create_watchlist_items.sql` to the configured Neon database at startup.
+Flyway automatically applies all migrations through `V5__create_portfolio_snapshots.sql` to the configured Neon database at startup.
 
 ## Run the Frontend
 
@@ -238,11 +243,26 @@ WebSocket/STOMP configuration:
 
 The mock generator broadcasts AAPL, MSFT, TSLA, AMZN, GOOGL, NVDA, and META. Provider API keys remain backend-only. Redis pub/sub is deferred.
 
+## Portfolio Analytics API
+
+All analytics endpoints require `Authorization: Bearer <accessToken>`. Calculations are performed by the backend from virtual wallet, holdings, orders, trades, snapshots, and current provider quotes.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/analytics/overview` | Complete analytics overview |
+| `GET` | `/api/analytics/performance` | Portfolio snapshot history |
+| `GET` | `/api/analytics/allocation` | Allocation by holding |
+| `GET` | `/api/analytics/holdings` | Holding-level performance |
+| `GET` | `/api/analytics/trading-stats` | Order and trade statistics |
+| `POST` | `/api/analytics/snapshot` | Create a current-user snapshot |
+
+The scheduler creates snapshots every five minutes by default. Daily P/L uses the latest prior-day snapshot as its baseline. Recharts is used only to visualize backend response values.
+
 ## Development Commit
 
 ```bash
 git add .
-git commit -m "feat: implement phase 5 watchlist and live price updates"
+git commit -m "feat: implement phase 6 portfolio analytics dashboard"
 ```
 
 ## Roadmap
@@ -253,7 +273,7 @@ git commit -m "feat: implement phase 5 watchlist and live price updates"
 - Phase 3: Transactional market orders, holdings, portfolio, orders, and trades — complete
 - Phase 4: Limit orders, stop-loss sells, pending processing, and cancellation — complete
 - Phase 5: Watchlists and live demo price updates — complete
-- Phase 6: Portfolio performance analytics and charts
+- Phase 6: Portfolio performance analytics and charts — complete
 - Phase 7: Redis caching, Docker support, testing, and deployment hardening
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.

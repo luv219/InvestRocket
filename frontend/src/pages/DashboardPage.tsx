@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { SummaryCard } from '../components/SummaryCard'
+import { getAnalyticsOverview } from '../features/analytics/analyticsService'
 import { useAuth } from '../features/auth/useAuth'
 import { getPendingOrders } from '../features/orders/orderService'
-import { getPortfolioSummary } from '../features/portfolio/portfolioService'
 import { getWatchlist } from '../features/watchlist/watchlistService'
-import type { PortfolioSummary } from '../types/portfolio'
+import type { PortfolioAnalytics } from '../types/analytics'
 import { getApiErrorMessage } from '../utils/apiError'
 import { formatCurrency, formatNumber } from '../utils/formatters'
 
@@ -14,6 +14,7 @@ const quickLinks = [
   { to: '/market', label: 'Explore Market', description: 'Search stocks and place virtual market orders.' },
   { to: '/watchlist', label: 'Watchlist', description: 'Track selected symbols with live demo price updates.' },
   { to: '/portfolio', label: 'View Portfolio', description: 'Review holdings and current valuation.' },
+  { to: '/analytics', label: 'Analytics', description: 'Review performance history, allocation, and trading statistics.' },
   { to: '/orders', label: 'Orders', description: 'Inspect your simulated order history.' },
   { to: '/orders/pending', label: 'Pending Orders', description: 'Review or cancel advanced orders awaiting triggers.' },
   { to: '/trades', label: 'Trades', description: 'Review executions and realized profit or loss.' },
@@ -21,15 +22,15 @@ const quickLinks = [
 
 export function DashboardPage() {
   const { user, logout } = useAuth()
-  const [summary, setSummary] = useState<PortfolioSummary | null>(null)
+  const [analytics, setAnalytics] = useState<PortfolioAnalytics | null>(null)
   const [pendingCount, setPendingCount] = useState<number | null>(null)
   const [watchlistCount, setWatchlistCount] = useState<number | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    Promise.all([getPortfolioSummary(), getPendingOrders(), getWatchlist()])
-      .then(([summaryData, pendingOrders, watchlistItems]) => {
-        setSummary(summaryData)
+    Promise.all([getAnalyticsOverview(), getPendingOrders(), getWatchlist()])
+      .then(([analyticsData, pendingOrders, watchlistItems]) => {
+        setAnalytics(analyticsData)
         setPendingCount(pendingOrders.length)
         setWatchlistCount(watchlistItems.length)
       })
@@ -52,10 +53,11 @@ export function DashboardPage() {
       {error && <p className="mt-6 text-sm text-red-300">{error}</p>}
 
       <section className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-6">
-        <SummaryCard label="Available Cash" value={summary ? formatCurrency(summary.availableCash) : error ? 'Unavailable' : 'Loading...'} />
-        <SummaryCard label="Holdings Value" value={summary ? formatCurrency(summary.holdingsValue) : error ? 'Unavailable' : 'Loading...'} />
-        <SummaryCard label="Total Portfolio Value" value={summary ? formatCurrency(summary.totalPortfolioValue) : error ? 'Unavailable' : 'Loading...'} />
-        <SummaryCard label="Number of Holdings" value={summary ? formatNumber(summary.numberOfHoldings) : error ? 'Unavailable' : 'Loading...'} />
+        <SummaryCard label="Portfolio Value" value={analytics ? formatCurrency(analytics.currentPortfolioValue) : error ? 'Unavailable' : 'Loading...'} />
+        <SummaryCard label="Total Return" value={analytics ? `${analytics.totalReturnPercent.toFixed(2)}%` : error ? 'Unavailable' : 'Loading...'} valueClassName={analytics && analytics.totalReturnPercent < 0 ? 'text-red-400' : 'text-rocket-400'} />
+        <SummaryCard label="Total P/L" value={analytics ? formatCurrency(analytics.totalProfitLoss) : error ? 'Unavailable' : 'Loading...'} valueClassName={analytics && analytics.totalProfitLoss < 0 ? 'text-red-400' : 'text-rocket-400'} />
+        <SummaryCard label="Cash Balance" value={analytics ? formatCurrency(analytics.cashBalance) : error ? 'Unavailable' : 'Loading...'} />
+        <SummaryCard label="Holdings Value" value={analytics ? formatCurrency(analytics.holdingsValue) : error ? 'Unavailable' : 'Loading...'} />
         <SummaryCard label="Pending Orders" value={pendingCount !== null ? formatNumber(pendingCount) : error ? 'Unavailable' : 'Loading...'} />
         <SummaryCard label="Watchlist Symbols" value={watchlistCount !== null ? formatNumber(watchlistCount) : error ? 'Unavailable' : 'Loading...'} />
       </section>

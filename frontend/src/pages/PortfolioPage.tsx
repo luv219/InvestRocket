@@ -44,9 +44,14 @@ export function PortfolioPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-14">
-      <header>
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rocket-400">Virtual portfolio</p>
-        <h1 className="mt-3 text-4xl font-bold text-white">Portfolio</h1>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rocket-400">Virtual portfolio</p>
+          <h1 className="mt-3 text-4xl font-bold text-white">Portfolio</h1>
+        </div>
+        <Link to="/analytics" className="w-fit rounded-xl bg-rocket-500 px-5 py-3 font-semibold text-slate-950 hover:bg-rocket-400">
+          View Analytics
+        </Link>
       </header>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

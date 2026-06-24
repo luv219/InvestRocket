@@ -36,6 +36,9 @@ export function Navbar() {
               <NavLink to="/portfolio" className={navLinkClass}>
                 Portfolio
               </NavLink>
+              <NavLink to="/analytics" className={navLinkClass}>
+                Analytics
+              </NavLink>
               <NavLink to="/orders" className={navLinkClass}>
                 Orders
               </NavLink>

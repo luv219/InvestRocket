@@ -68,6 +68,8 @@ Status: complete. The stream is a development/demo simulation and is not exchang
 - Recharts visualizations
 - Dashboard analytics
 
+Status: complete. Analytics are calculated by the backend from virtual wallet, holdings, orders, trades, snapshots, and configured market data.
+
 ## Phase 7 — Hardening and Delivery
 
 - Redis quote caching

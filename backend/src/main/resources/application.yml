@@ -37,6 +37,9 @@ app:
   live-price-stream:
     enabled: ${LIVE_PRICE_STREAM_ENABLED:true}
     interval-ms: ${LIVE_PRICE_STREAM_INTERVAL_MS:5000}
+  portfolio-snapshot:
+    enabled: ${PORTFOLIO_SNAPSHOT_ENABLED:true}
+    interval-ms: ${PORTFOLIO_SNAPSHOT_INTERVAL_MS:300000}
 
 management:
   endpoints:

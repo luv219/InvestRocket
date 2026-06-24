@@ -10,7 +10,7 @@ The backend connects using:
 - `DATABASE_USERNAME`: Neon role
 - `DATABASE_PASSWORD`: Neon password
 
-Flyway owns schema changes. `V4__create_watchlist_items.sql` adds Phase 5 per-user watchlists and uniqueness constraints.
+Flyway owns schema changes. `V5__create_portfolio_snapshots.sql` adds Phase 6 performance history.
 
 ## Users
 
@@ -106,9 +106,26 @@ Each successful order creates one immutable trade.
 
 `user_id + symbol` is unique. Live price ticks remain in memory and are not persisted.
 
+## Portfolio Snapshots
+
+| Column | Type | Rules |
+| --- | --- | --- |
+| `id` | `UUID` | Primary key |
+| `user_id` | `UUID` | Owner; cascades when user is deleted |
+| `cash_balance`, `reserved_cash` | `NUMERIC(19,2)` | Virtual cash state |
+| `holdings_value`, `total_portfolio_value` | `NUMERIC(19,2)` | Portfolio valuation |
+| `total_invested` | `NUMERIC(19,2)` | Current holdings cost basis |
+| `unrealized_profit_loss`, `realized_profit_loss` | `NUMERIC(19,2)` | Snapshot P/L |
+| `daily_profit_loss` | `NUMERIC(19,2)` | Change from prior-day baseline |
+| `daily_profit_loss_percent`, `overall_return_percent` | `NUMERIC(19,4)` | Rounded analytics percentages |
+| `snapshot_date` | `DATE` | UTC date for chart grouping |
+| `snapshot_time`, `created_at` | `TIMESTAMPTZ` | Exact UTC timestamps |
+
+Indexes on `(user_id, snapshot_time)` and `(user_id, snapshot_date)` support history queries.
+
 ## Future Tables
 
-Later phases may add portfolio snapshots and analytics history.
+Later phases may add longer-term analytics aggregates if required.
 
 ## Data Integrity Principles
 

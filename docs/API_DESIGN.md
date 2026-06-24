@@ -331,10 +331,51 @@ Response:
 }
 ```
 
-## Planned Resources
+## Analytics
 
-| Phase | Resource area | Example path |
+All analytics endpoints require a valid bearer token and derive the user from the JWT principal.
+
+| Method | Endpoint | Purpose |
 | --- | --- | --- |
-| Future | Analytics | `/api/analytics/portfolio` |
+| `GET` | `/api/analytics/overview` | Full portfolio analytics |
+| `GET` | `/api/analytics/performance` | Snapshot-based value history |
+| `GET` | `/api/analytics/allocation` | Current stock allocation |
+| `GET` | `/api/analytics/holdings` | Per-holding performance |
+| `GET` | `/api/analytics/trading-stats` | Order and trade statistics |
+| `POST` | `/api/analytics/snapshot` | Create a snapshot for the current user |
 
-These future paths are architectural proposals and are not part of Phase 5.
+Overview response data:
+
+```json
+{
+  "currentPortfolioValue": 104250.00,
+  "initialBalance": 100000.00,
+  "cashBalance": 51250.00,
+  "reservedCash": 0.00,
+  "holdingsValue": 53000.00,
+  "totalInvested": 50000.00,
+  "realizedProfitLoss": 1250.00,
+  "unrealizedProfitLoss": 3000.00,
+  "totalProfitLoss": 4250.00,
+  "totalReturnPercent": 4.25,
+  "bestHolding": {},
+  "worstHolding": {},
+  "allocation": [],
+  "performanceHistory": [],
+  "tradingStats": {}
+}
+```
+
+Performance point:
+
+```json
+{
+  "date": "2026-06-24",
+  "snapshotTime": "2026-06-24T16:00:00Z",
+  "totalPortfolioValue": 104250.00,
+  "cashBalance": 51250.00,
+  "holdingsValue": 53000.00,
+  "dailyProfitLoss": 250.00,
+  "dailyProfitLossPercent": 0.24
+}
+```
