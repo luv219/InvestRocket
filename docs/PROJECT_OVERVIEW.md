@@ -8,6 +8,8 @@ Invest Rocket is a virtual trading simulator for educational purposes only. It d
 
 The completed system demonstrates secure authentication, transactional virtual trading, scheduled processing, WebSocket updates, analytics, administration, automated testing, and containerized deployment preparation.
 
+The final interface uses a responsive navigation system, reusable UI states, accessible focus treatment, readable financial formatting, first-time user onboarding, and portfolio-ready landing and dashboard experiences.
+
 ## Completed Foundation
 
 - Spring Boot backend foundation with a public health endpoint

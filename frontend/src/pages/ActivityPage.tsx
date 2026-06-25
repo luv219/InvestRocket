@@ -10,6 +10,11 @@ import type {
 } from '../types/activity'
 import { getApiErrorMessage } from '../utils/apiError'
 import { formatDateTime } from '../utils/formatters'
+import { Alert } from '../components/ui/Alert'
+import { EmptyState } from '../components/ui/EmptyState'
+import { LoadingSpinner } from '../components/ui/LoadingSpinner'
+import { PageHeader } from '../components/ui/PageHeader'
+import { Table, TableContainer } from '../components/ui/Table'
 
 const categories: Array<'ALL' | ActivityCategory> = [
   'ALL',
@@ -51,17 +56,11 @@ export function ActivityPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rocket-400">
-            Account audit trail
-          </p>
-          <h1 className="mt-3 text-4xl font-bold text-white">Activity</h1>
-          <p className="mt-3 text-slate-400">
-            Security and simulator actions recorded for your account.
-          </p>
-        </div>
-        <select
+      <PageHeader
+        eyebrow="Account audit trail"
+        title="Activity"
+        description="Security and simulator actions recorded for your account."
+        actions={<label className="grid gap-2 text-sm text-slate-300"><span>Filter category</span><select
           value={category}
           onChange={(event) =>
             handleCategoryChange(
@@ -75,28 +74,24 @@ export function ActivityPage() {
               {item === 'ALL' ? 'All categories' : item}
             </option>
           ))}
-        </select>
-      </header>
+        </select></label>}
+      />
 
       {error && (
-        <p className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300">
-          {error}
-        </p>
+        <div className="mt-6"><Alert tone="error">{error}</Alert></div>
       )}
 
       {isLoading ? (
-        <p className="mt-10 text-slate-400">Loading activity...</p>
+        <LoadingSpinner label="Loading activity..." />
       ) : activity.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-700 px-6 py-14 text-center text-slate-500">
-          No activity recorded yet.
-        </div>
+        <div className="mt-8"><EmptyState title="No activity recorded yet" description="Security, profile, order, trade, watchlist, and system activity will appear here." /></div>
       ) : (
-        <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-800">
-          <table className="min-w-full divide-y divide-slate-800 text-left text-sm">
+        <TableContainer className="mt-8">
+          <Table>
             <thead className="bg-slate-900 text-slate-400">
               <tr>
                 {['Category', 'Action', 'Description', 'Time'].map((heading) => (
-                  <th key={heading} className="px-5 py-4 font-medium">
+                  <th key={heading} scope="col" className="whitespace-nowrap px-5 py-4 font-medium">
                     {heading}
                   </th>
                 ))}
@@ -118,8 +113,8 @@ export function ActivityPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </TableContainer>
       )}
     </div>
   )

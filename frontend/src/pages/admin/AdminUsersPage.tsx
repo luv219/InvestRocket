@@ -14,11 +14,18 @@ import {
   formatNumber,
 } from '../../utils/formatters'
 import { AdminHeader } from './AdminDashboardPage'
+import { Alert } from '../../components/ui/Alert'
+import { Badge } from '../../components/ui/Badge'
+import { EmptyState } from '../../components/ui/EmptyState'
+import { Input } from '../../components/ui/Input'
+import { Table, TableContainer } from '../../components/ui/Table'
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 
 export function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     getAdminUsers()
@@ -26,6 +33,7 @@ export function AdminUsersPage() {
       .catch((requestError) =>
         setError(getApiErrorMessage(requestError, 'Unable to load users')),
       )
+      .finally(() => setIsLoading(false))
   }, [])
 
   const filteredUsers = useMemo(() => {
@@ -60,20 +68,23 @@ export function AdminUsersPage() {
         title="Users"
         description="Manage simulator access and inspect account activity."
       />
-      <input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search name or email"
-        className="mt-7 w-full max-w-md rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-      />
-      {error && <p className="mt-5 text-red-300">{error}</p>}
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-800">
-        <table className="min-w-full divide-y divide-slate-800 text-left text-sm">
+      <label className="mt-7 grid max-w-md gap-2 text-sm text-slate-300">
+        <span>Search users</span>
+        <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name or email" />
+      </label>
+      {error && <div className="mt-5"><Alert tone="error">{error}</Alert></div>}
+      {isLoading ? (
+        <LoadingSpinner label="Loading users..." />
+      ) : users.length > 0 && filteredUsers.length === 0 ? (
+        <div className="mt-8"><EmptyState title="No matching users" description="Try a different name or email address." /></div>
+      ) : (
+      <TableContainer className="mt-8">
+        <Table>
           <thead className="bg-slate-900 text-slate-400">
             <tr>
               {['Name', 'Email', 'Role', 'Status', 'Created', 'Orders', 'Trades', 'Cash', 'Actions'].map(
                 (heading) => (
-                  <th key={heading} className="px-4 py-3 font-medium">
+                  <th key={heading} scope="col" className="whitespace-nowrap px-4 py-3 font-medium">
                     {heading}
                   </th>
                 ),
@@ -85,8 +96,8 @@ export function AdminUsersPage() {
               <tr key={user.id}>
                 <td className="px-4 py-4 font-medium text-white">{user.fullName}</td>
                 <td className="px-4 py-4 text-slate-300">{user.email}</td>
-                <td className="px-4 py-4 text-rocket-400">{user.role}</td>
-                <td className="px-4 py-4">{user.enabled ? 'Enabled' : 'Disabled'}</td>
+                <td className="px-4 py-4"><Badge tone={user.role === 'ADMIN' ? 'info' : 'neutral'}>{user.role}</Badge></td>
+                <td className="px-4 py-4"><Badge tone={user.enabled ? 'success' : 'danger'}>{user.enabled ? 'Enabled' : 'Disabled'}</Badge></td>
                 <td className="px-4 py-4 text-slate-400">
                   {formatDateTime(user.createdAt)}
                 </td>
@@ -115,8 +126,9 @@ export function AdminUsersPage() {
               </tr>
             ))}
           </tbody>
-        </table>
-      </div>
+        </Table>
+      </TableContainer>
+      )}
     </div>
   )
 }

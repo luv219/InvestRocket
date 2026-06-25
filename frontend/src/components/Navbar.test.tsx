@@ -26,8 +26,24 @@ test('shows login and register links when logged out', () => {
   )
 
   expect(screen.getByRole('link', { name: 'Login' })).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Register' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Get Started' })).toBeInTheDocument()
   expect(screen.queryByRole('link', { name: 'Admin' })).not.toBeInTheDocument()
+})
+
+test('opens the mobile navigation with an accessible toggle', async () => {
+  useAuthMock.mockReturnValue(authValue())
+  const user = (await import('@testing-library/user-event')).default.setup()
+  render(
+    <MemoryRouter>
+      <Navbar />
+    </MemoryRouter>,
+  )
+
+  const toggle = screen.getByRole('button', { name: 'Open navigation menu' })
+  await user.click(toggle)
+
+  expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  expect(screen.getAllByRole('link', { name: 'Get Started' })).toHaveLength(2)
 })
 
 test('shows protected links without admin link for regular users', () => {

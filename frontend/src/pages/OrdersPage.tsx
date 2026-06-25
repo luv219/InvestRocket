@@ -2,11 +2,19 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { getOrders } from '../features/orders/orderService'
+import { Alert } from '../components/ui/Alert'
+import { Badge } from '../components/ui/Badge'
+import { EmptyState } from '../components/ui/EmptyState'
+import { LoadingSpinner } from '../components/ui/LoadingSpinner'
+import { PageHeader } from '../components/ui/PageHeader'
+import { Table, TableContainer } from '../components/ui/Table'
 import type { Order } from '../types/order'
 import { getApiErrorMessage } from '../utils/apiError'
 import {
   formatCurrency,
   formatDateTime,
+  formatOrderSide,
+  formatOrderStatus,
   formatOptionalCurrency,
   formatOptionalDateTime,
 } from '../utils/formatters'
@@ -29,27 +37,29 @@ export function OrdersPage() {
 
   return (
     <div className="mx-auto max-w-[90rem] px-6 py-14">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-4xl font-bold text-white">Order History</h1>
-        {hasPending && (
+      <PageHeader
+        eyebrow="Virtual trading"
+        title="Order History"
+        description="Review every simulated order and its final lifecycle state."
+        actions={hasPending ? (
           <Link
             to="/orders/pending"
             className="rounded-xl bg-amber-400/15 px-4 py-2 font-semibold text-amber-300"
           >
             View Pending Orders
           </Link>
-        )}
-      </div>
+        ) : undefined}
+      />
       {isLoading && (
-        <p className="mt-8 text-slate-400">Loading orders...</p>
+        <LoadingSpinner label="Loading orders..." />
       )}
-      {error && <p className="mt-8 text-red-300">{error}</p>}
+      {error && <div className="mt-8"><Alert tone="error">{error}</Alert></div>}
       {!isLoading && !error && orders.length === 0 && (
-        <p className="mt-8 text-slate-400">No orders yet.</p>
+        <div className="mt-8"><EmptyState title="No orders yet" description="Search the market and place a virtual order to begin your trading history." /></div>
       )}
       {orders.length > 0 && (
-        <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-800">
-          <table className="min-w-full divide-y divide-slate-800 text-left text-sm">
+        <TableContainer className="mt-8">
+          <Table>
             <thead className="bg-slate-900 text-slate-400">
               <tr>
                 {[
@@ -68,7 +78,7 @@ export function OrdersPage() {
                   'Cancelled At',
                   'Journal',
                 ].map((heading) => (
-                  <th key={heading} className="px-4 py-3 font-medium">
+                  <th key={heading} scope="col" className="whitespace-nowrap px-4 py-3 font-medium">
                     {heading}
                   </th>
                 ))}
@@ -87,7 +97,7 @@ export function OrdersPage() {
                         : 'text-red-400'
                     }`}
                   >
-                    {order.side}
+                    {formatOrderSide(order.side)}
                   </td>
                   <td className="px-4 py-4 text-slate-300">
                     {order.orderType}
@@ -107,8 +117,10 @@ export function OrdersPage() {
                   <td className="px-4 py-4 text-slate-300">
                     {formatCurrency(order.totalAmount)}
                   </td>
-                  <td className="px-4 py-4 text-slate-300">
-                    {order.status}
+                  <td className="px-4 py-4">
+                    <Badge tone={order.status === 'EXECUTED' ? 'success' : order.status === 'PENDING' ? 'warning' : order.status === 'CANCELLED' ? 'neutral' : 'danger'}>
+                      {formatOrderStatus(order.status)}
+                    </Badge>
                   </td>
                   <td className="max-w-48 px-4 py-4 text-slate-400">
                     {order.statusReason ?? '—'}
@@ -133,8 +145,8 @@ export function OrdersPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </TableContainer>
       )}
     </div>
   )

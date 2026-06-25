@@ -30,6 +30,11 @@
 
 ## Portfolio Presentation
 
+- [ ] Responsive layouts checked at 1366px, 1024px, 768px, and 390px
+- [ ] Keyboard navigation and visible focus states checked
+- [ ] Form labels, errors, empty states, and loading states checked
+- [ ] Landing page and dashboard polish reviewed
+- [ ] Demo accounts and sample data prepared
 - [ ] Live demo links are added to README
 - [ ] Screenshots are added under `docs/screenshots/`
 - [ ] Demo walkthrough has been rehearsed
@@ -43,3 +48,4 @@
 - [ ] Market, orders, portfolio, analytics, watchlist, alerts, notifications, journal, and settings work
 - [ ] Admin pages work for ADMIN and reject USER
 - [ ] Simulator disclaimer is visible
+- [ ] README is finalized and no secrets are committed

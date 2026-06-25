@@ -13,6 +13,7 @@
 - Sanitized API errors with no stack traces in responses
 - Disabled-by-default admin bootstrap with self-lockout protection
 - `.env`, build, test, and dependency artifacts excluded from Git/Docker contexts
+- Frontend route checks improve navigation UX, while backend authentication, ownership, and ADMIN authorization remain the security boundary
 
 ## Production Checklist
 

@@ -14,6 +14,10 @@ import type {
 } from '../types/journal'
 import { getApiErrorMessage } from '../utils/apiError'
 import { formatDateTime } from '../utils/formatters'
+import { LoadingSpinner } from '../components/ui/LoadingSpinner'
+import { EmptyState } from '../components/ui/EmptyState'
+import { Alert } from '../components/ui/Alert'
+import { PageHeader } from '../components/ui/PageHeader'
 
 const moods: JournalMood[] = [
   'CONFIDENT',
@@ -29,6 +33,7 @@ export function TradingJournalPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [filter, setFilter] = useState('')
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
   const [form, setForm] = useState<CreateJournalEntryRequest>({
     title: '',
     content: '',
@@ -41,9 +46,12 @@ export function TradingJournalPage() {
   })
 
   useEffect(() => {
-    getEntries().then(setEntries).catch((requestError) =>
-      setError(getApiErrorMessage(requestError, 'Unable to load journal')),
-    )
+    getEntries()
+      .then(setEntries)
+      .catch((requestError) =>
+        setError(getApiErrorMessage(requestError, 'Unable to load journal')),
+      )
+      .finally(() => setIsLoading(false))
   }, [])
 
   function resetForm() {
@@ -110,8 +118,7 @@ export function TradingJournalPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
-      <h1 className="text-4xl font-bold text-white">Trading Journal</h1>
-      <p className="mt-3 text-slate-400">Record decisions, strategies, and lessons from simulated trades.</p>
+      <PageHeader eyebrow="Trading reflection" title="Trading Journal" description="Record decisions, strategies, and lessons from simulated trades." />
       <form onSubmit={submit} className="mt-8 grid gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 md:grid-cols-2">
         <input required maxLength={150} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Entry title" className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white" />
         <select value={form.mood} onChange={(event) => setForm({ ...form, mood: event.target.value as JournalMood })} className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white">
@@ -126,13 +133,15 @@ export function TradingJournalPage() {
           {editingId && <button type="button" onClick={resetForm} className="rounded-xl border border-slate-700 px-6 py-3 font-semibold text-white">Cancel edit</button>}
         </div>
       </form>
-      {error && <p className="mt-5 text-red-300">{error}</p>}
+      {error && <div className="mt-5"><Alert tone="error">{error}</Alert></div>}
       <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-white">Journal entries</h2>
         <input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Filter by symbol" className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 uppercase text-white" />
       </div>
-      {visibleEntries.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-slate-700 p-12 text-center text-slate-500">No journal entries yet. Record your first trading note.</p>
+      {isLoading ? (
+        <LoadingSpinner label="Loading journal entries..." />
+      ) : visibleEntries.length === 0 ? (
+        <div className="mt-6"><EmptyState title="No journal entries yet" description="Record your first trading note, strategy, or lesson." /></div>
       ) : (
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           {visibleEntries.map((entry) => (

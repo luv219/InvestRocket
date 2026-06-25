@@ -1,39 +1,69 @@
 # Demo Script
 
-## 5–7 Minute Walkthrough
+## 5–7 Minute Portfolio Presentation
 
-### 1. Introduction — 30 seconds
+### 1. Opening and Problem — 30 seconds
 
-Introduce Invest Rocket as a full-stack virtual stock trading simulator built for education and portfolio demonstration. State clearly that it does not execute real trades or provide financial advice.
+“Invest Rocket is a full-stack virtual stock trading simulator. It addresses a common learning problem: people want to understand market workflows, orders, portfolios, and risk controls without connecting a brokerage account or risking real money.”
 
-### 2. Registration and Login — 30 seconds
+State the boundary clearly: Invest Rocket is educational software, not financial advice, and it never executes real trades.
 
-Register a new user, explain BCrypt password hashing and JWT authentication, and show the automatic `$100,000` virtual wallet.
+### 2. Solution Overview — 30 seconds
 
-### 3. Market Search and Quote — 45 seconds
+Explain that users receive a virtual `$100,000` wallet, search stocks, place simulated orders, track holdings, analyze performance, create alerts, and record decisions in a trading journal. Administrators can monitor users, activity, and platform health.
 
-Search for `AAPL`, open the stock detail page, identify the provider abstraction, and point out the live demo WebSocket price updates.
+### 3. Register and Authenticate — 30 seconds
 
-### 4. Virtual Order and Portfolio — 60 seconds
+Show registration or login. Mention:
 
-Place a small market buy, then show the created order, trade, wallet change, and portfolio holding. Mention transactional backend updates and fixed-precision money.
+- BCrypt password hashing
+- Stateless JWT authentication
+- Protected user routes
+- Backend-enforced ADMIN authorization
 
-### 5. Analytics and Watchlist — 45 seconds
+### 4. Search and Trade — 75 seconds
 
-Open analytics to show portfolio value, allocation, returns, and trading statistics. Add the stock to the watchlist and show live price movement.
+1. Search for `AAPL`.
+2. Open the stock detail page.
+3. Show live demo WebSocket price updates.
+4. Add the symbol to the watchlist.
+5. Place a small market buy.
+6. Show a pending limit order or stop-loss example.
+
+Explain that wallet, holdings, order, and trade changes are transactional and use fixed-precision decimal values.
+
+### 5. Portfolio and Analytics — 60 seconds
+
+Open the portfolio to show available cash, reserved cash, holdings, valuation, and unrealized profit or loss. Open analytics to demonstrate allocation, return metrics, performance history, and trading statistics.
 
 ### 6. Alerts, Notifications, and Journal — 60 seconds
 
-Create an ABOVE or BELOW price alert, open the notification center, and add a journal note linked to the trade or symbol.
+Create an ABOVE or BELOW price alert. Open notifications to show order and alert events. Add a journal entry linked to a symbol, order, or trade and explain how it supports reflection rather than automated recommendations.
 
-### 7. Admin Dashboard — 45 seconds
+### 7. Admin and System Design — 60 seconds
 
-Log in as an administrator and show user management, platform trading statistics, audit visibility, provider status, and system health. Explain that backend method security is authoritative.
+Open the admin dashboard and show:
 
-### 8. Technical Architecture — 45 seconds
+- User management
+- Platform order/trade statistics
+- Audit visibility
+- Database and provider health
 
-Summarize React/TypeScript/Tailwind/Recharts, Spring Boot/Java 21, Neon PostgreSQL/Flyway, JWT/BCrypt, provider abstraction, STOMP, scheduled processors, automated tests, Docker, and GitHub Actions.
+Summarize the architecture:
 
-### 9. Close — 15 seconds
+- React, TypeScript, Tailwind CSS, Recharts
+- Java 21, Spring Boot, Security, JPA, Flyway
+- Neon PostgreSQL
+- Mock/Finnhub provider abstraction
+- STOMP WebSockets and scheduled processors
+- JUnit, MockMvc, Vitest, Docker, and GitHub Actions
 
-Reiterate: Invest Rocket is a virtual trading simulator for educational purposes only. It does not provide financial advice and does not execute real trades.
+### 8. Security and Compliance Boundary — 30 seconds
+
+Mention exact-origin CORS, backend-only API keys, password secrecy, ownership checks, disabled-by-default admin bootstrap, and sanitized errors. Reiterate that no real-money trading, brokerage integration, payments, KYC, or investment recommendations are included.
+
+### 9. Future Scope and Close — 30 seconds
+
+Potential future work includes secure cookie-based sessions, refresh-token rotation, rate limiting, Redis-backed scaling, browser end-to-end tests, and stronger observability.
+
+Close with: “Invest Rocket demonstrates production-minded full-stack architecture while keeping the financial workflow safe, simulated, and educational.”

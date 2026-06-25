@@ -10,8 +10,8 @@ test('renders the portfolio-ready landing page and disclaimer', () => {
     </MemoryRouter>,
   )
 
-  expect(screen.getByRole('heading', { name: /practice investing/i })).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: /create an account/i })).toHaveAttribute(
+  expect(screen.getByRole('heading', { name: /practice trading.*learn markets safely/i })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Get Started' })).toHaveAttribute(
     'href',
     '/register',
   )

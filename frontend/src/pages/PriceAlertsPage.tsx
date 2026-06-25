@@ -9,6 +9,11 @@ import {
 import type { PriceAlert, PriceAlertCondition } from '../types/alert'
 import { getApiErrorMessage } from '../utils/apiError'
 import { formatCurrency, formatDateTime } from '../utils/formatters'
+import { Alert } from '../components/ui/Alert'
+import { Badge } from '../components/ui/Badge'
+import { EmptyState } from '../components/ui/EmptyState'
+import { PageHeader } from '../components/ui/PageHeader'
+import { LoadingSpinner } from '../components/ui/LoadingSpinner'
 
 export function PriceAlertsPage() {
   const [params] = useSearchParams()
@@ -18,11 +23,15 @@ export function PriceAlertsPage() {
   const [targetPrice, setTargetPrice] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    getAlerts().then(setAlerts).catch((requestError) =>
-      setError(getApiErrorMessage(requestError, 'Unable to load price alerts')),
-    )
+    getAlerts()
+      .then(setAlerts)
+      .catch((requestError) =>
+        setError(getApiErrorMessage(requestError, 'Unable to load price alerts')),
+      )
+      .finally(() => setIsLoading(false))
   }, [])
 
   async function submit(event: FormEvent) {
@@ -55,8 +64,7 @@ export function PriceAlertsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
-      <h1 className="text-4xl font-bold text-white">Price Alerts</h1>
-      <p className="mt-3 text-slate-400">Alerts use the configured simulated or financial market-data provider.</p>
+      <PageHeader eyebrow="Market monitoring" title="Price Alerts" description="Create simulated thresholds using the configured market-data provider." />
       <form onSubmit={submit} className="mt-8 grid gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:grid-cols-4">
         <input required value={symbol} onChange={(event) => setSymbol(event.target.value)} placeholder="Symbol" className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 uppercase text-white" />
         <select value={condition} onChange={(event) => setCondition(event.target.value as PriceAlertCondition)} className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white">
@@ -66,11 +74,13 @@ export function PriceAlertsPage() {
         <input required min="0.0001" step="0.01" type="number" value={targetPrice} onChange={(event) => setTargetPrice(event.target.value)} placeholder="Target price" className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white" />
         <button disabled={isSubmitting} className="rounded-xl bg-rocket-500 px-5 py-3 font-semibold text-slate-950 disabled:opacity-60">{isSubmitting ? 'Creating...' : 'Create Alert'}</button>
       </form>
-      {error && <p className="mt-5 text-red-300">{error}</p>}
+      {error && <div className="mt-5"><Alert tone="error">{error}</Alert></div>}
       <section className="mt-10">
         <h2 className="text-2xl font-bold text-white">Active alerts ({active.length})</h2>
-        {alerts.length === 0 ? (
-          <p className="mt-5 rounded-2xl border border-dashed border-slate-700 p-12 text-center text-slate-500">No price alerts yet.</p>
+        {isLoading ? (
+          <LoadingSpinner label="Loading price alerts..." />
+        ) : alerts.length === 0 ? (
+          <div className="mt-5"><EmptyState title="No price alerts yet" description="Create an ABOVE or BELOW threshold to monitor a symbol." /></div>
         ) : (
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {alerts.map((alert) => (
@@ -80,7 +90,7 @@ export function PriceAlertsPage() {
                     <p className="font-bold text-rocket-400">{alert.symbol}</p>
                     <h3 className="mt-1 text-lg font-semibold text-white">{alert.companyName}</h3>
                   </div>
-                  <span className={`h-fit rounded-full px-3 py-1 text-xs font-semibold ${alert.status === 'ACTIVE' ? 'bg-blue-500/15 text-blue-300' : alert.status === 'TRIGGERED' ? 'bg-rocket-500/15 text-rocket-300' : 'bg-slate-700 text-slate-300'}`}>{alert.status}</span>
+                  <Badge tone={alert.status === 'ACTIVE' ? 'info' : alert.status === 'TRIGGERED' ? 'success' : 'neutral'}>{alert.status}</Badge>
                 </div>
                 <p className="mt-4 text-slate-300">{alert.condition} {formatCurrency(alert.targetPrice)}</p>
                 {alert.triggeredPrice !== null && <p className="mt-2 text-sm text-rocket-300">Triggered at {formatCurrency(alert.triggeredPrice)}</p>}

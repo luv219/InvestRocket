@@ -4,9 +4,9 @@ Invest Rocket is a full-stack virtual stock trading simulator for learning, expe
 
 > **Disclaimer:** Invest Rocket is a virtual trading simulator for educational purposes only. It does not provide financial advice and does not execute real trades.
 
-## Phase 11 Status
+## Phase 12 Status
 
-Invest Rocket is launch-ready with GitHub Actions CI, production environment references, Render/Railway/Vercel/Netlify deployment guidance, Neon migration notes, Docker assets, and a final portfolio walkthrough.
+Invest Rocket now includes final responsive UI polish, accessible navigation and states, consistent financial/status formatting, improved landing and dashboard experiences, and a reproducible demo-data strategy.
 
 The admin bootstrap is disabled by default and never contains a real credential in source control.
 
@@ -336,7 +336,7 @@ Order execution, pending-order creation/cancellation, simulator reset, and trigg
 
 ```bash
 git add .
-git commit -m "chore: prepare phase 11 production deployment and launch readiness"
+git commit -m "style: polish phase 12 UI UX accessibility and demo readiness"
 ```
 
 ## Roadmap
@@ -353,6 +353,7 @@ git commit -m "chore: prepare phase 11 production deployment and launch readines
 - Phase 9: Notifications, price alerts, and trading journal — complete
 - Phase 10: Testing, hardening, Docker, and deployment preparation — complete
 - Phase 11: CI/CD, production deployment, and portfolio launch readiness — complete
+- Phase 12: UI/UX polish, accessibility, responsive design, and demo readiness — complete
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 
@@ -413,6 +414,7 @@ Workflow badges are intentionally omitted until the final GitHub repository owne
 - [Security review](docs/SECURITY.md)
 - [Testing strategy](docs/TESTING.md)
 - [5–7 minute demo script](docs/DEMO_SCRIPT.md)
+- [Demo data guide](docs/DEMO_DATA.md)
 - [Final launch checklist](docs/FINAL_CHECKLIST.md)
 
 ## Security Notes

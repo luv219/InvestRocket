@@ -10,7 +10,9 @@ export function AppLayout() {
         <Outlet />
       </main>
       <footer className="border-t border-slate-800 px-6 py-6 text-center text-sm text-slate-500">
-        Invest Rocket is a virtual trading simulator, not financial advice.
+        Invest Rocket is a virtual trading simulator for educational purposes
+        only. It does not provide financial advice and does not execute real
+        trades.
       </footer>
     </div>
   )

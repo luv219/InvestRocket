@@ -122,3 +122,14 @@ Status: complete. Backend workflows use `mvnd`; a local PostgreSQL server is nev
 - Demo script, screenshot plan, and final launch checklist
 
 Status: complete. No product features were added; this phase prepares the existing simulator for deployment and portfolio presentation.
+
+## Phase 12 — UI/UX Polish, Accessibility, and Demo Readiness
+
+- Responsive mobile navigation and consistent page layout
+- Shared buttons, cards, badges, alerts, loading, empty, table, and header components
+- Improved landing page, dashboard metrics, onboarding, and quick actions
+- Accessible form labels, focus states, dynamic messages, and table headers
+- Consistent financial, percent, date, order-side, and order-status formatting
+- Demo data guide, polished presentation script, and exact screenshot checklist
+
+Status: complete. Phase 12 changes presentation and usability only; backend trading behavior and APIs remain unchanged.

@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
 
 import { cancelOrder, getPendingOrders } from '../features/orders/orderService'
+import { Alert } from '../components/ui/Alert'
+import { Badge } from '../components/ui/Badge'
+import { EmptyState } from '../components/ui/EmptyState'
+import { LoadingSpinner } from '../components/ui/LoadingSpinner'
+import { PageHeader } from '../components/ui/PageHeader'
+import { Table, TableContainer } from '../components/ui/Table'
 import type { Order } from '../types/order'
 import { getApiErrorMessage } from '../utils/apiError'
 import {
   formatDateTime,
+  formatOrderSide,
+  formatOrderStatus,
   formatOptionalCurrency,
 } from '../utils/formatters'
 
@@ -65,32 +73,28 @@ export function PendingOrdersPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-14">
-      <h1 className="text-4xl font-bold text-white">Pending Orders</h1>
-      <p className="mt-3 text-slate-400">
-        Reserved cash and locked shares are released when an order is
-        cancelled.
-      </p>
+      <PageHeader
+        eyebrow="Advanced orders"
+        title="Pending Orders"
+        description="Reserved cash and locked shares are released when an order is cancelled."
+      />
 
       {message && (
-        <p className="mt-6 rounded-xl bg-rocket-500/10 px-4 py-3 text-rocket-300">
-          {message}
-        </p>
+        <div className="mt-6"><Alert tone="success">{message}</Alert></div>
       )}
       {error && (
-        <p className="mt-6 rounded-xl bg-red-500/10 px-4 py-3 text-red-300">
-          {error}
-        </p>
+        <div className="mt-6"><Alert tone="error">{error}</Alert></div>
       )}
       {isLoading && (
-        <p className="mt-8 text-slate-400">Loading pending orders...</p>
+        <LoadingSpinner label="Loading pending orders..." />
       )}
       {!isLoading && orders.length === 0 && (
-        <p className="mt-8 text-slate-400">No pending orders.</p>
+        <div className="mt-8"><EmptyState title="No pending orders" description="Limit and stop-loss orders waiting for a trigger will appear here." /></div>
       )}
 
       {orders.length > 0 && (
-        <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-800">
-          <table className="min-w-full divide-y divide-slate-800 text-left text-sm">
+        <TableContainer className="mt-8">
+          <Table>
             <thead className="bg-slate-900 text-slate-400">
               <tr>
                 {[
@@ -104,7 +108,7 @@ export function PendingOrdersPage() {
                   'Created',
                   'Action',
                 ].map((heading) => (
-                  <th key={heading} className="px-4 py-3 font-medium">
+                  <th key={heading} scope="col" className="whitespace-nowrap px-4 py-3 font-medium">
                     {heading}
                   </th>
                 ))}
@@ -116,7 +120,7 @@ export function PendingOrdersPage() {
                   <td className="px-4 py-4 font-semibold text-rocket-400">
                     {order.symbol}
                   </td>
-                  <td className="px-4 py-4 text-slate-300">{order.side}</td>
+                  <td className="px-4 py-4 text-slate-300">{formatOrderSide(order.side)}</td>
                   <td className="px-4 py-4 text-slate-300">
                     {order.orderType}
                   </td>
@@ -129,7 +133,7 @@ export function PendingOrdersPage() {
                   <td className="px-4 py-4 text-slate-300">
                     {formatOptionalCurrency(order.stopPrice)}
                   </td>
-                  <td className="px-4 py-4 text-amber-300">{order.status}</td>
+                  <td className="px-4 py-4"><Badge tone="warning">{formatOrderStatus(order.status)}</Badge></td>
                   <td className="px-4 py-4 text-slate-400">
                     {formatDateTime(order.createdAt)}
                   </td>
@@ -148,8 +152,8 @@ export function PendingOrdersPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </TableContainer>
       )}
     </div>
   )

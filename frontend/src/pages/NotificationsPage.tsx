@@ -9,6 +9,10 @@ import {
 import type { Notification } from '../types/notification'
 import { getApiErrorMessage } from '../utils/apiError'
 import { formatDateTime } from '../utils/formatters'
+import { Alert } from '../components/ui/Alert'
+import { EmptyState } from '../components/ui/EmptyState'
+import { LoadingSpinner } from '../components/ui/LoadingSpinner'
+import { PageHeader } from '../components/ui/PageHeader'
 
 export function NotificationsPage() {
   const [items, setItems] = useState<Notification[]>([])
@@ -45,20 +49,16 @@ export function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-14">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rocket-400">In-app updates</p>
-          <h1 className="mt-3 text-4xl font-bold text-white">Notifications</h1>
-        </div>
+      <PageHeader eyebrow="In-app updates" title="Notifications" description="Review order, alert, and simulator lifecycle messages." actions={
         <button type="button" onClick={() => void markAll()} className="rounded-xl border border-slate-700 px-4 py-2 font-semibold text-white hover:bg-slate-800">
           Mark all as read
         </button>
-      </header>
-      {error && <p className="mt-6 text-red-300">{error}</p>}
+      } />
+      {error && <div className="mt-6"><Alert tone="error">{error}</Alert></div>}
       {isLoading ? (
-        <p className="mt-8 text-slate-400">Loading notifications...</p>
+        <LoadingSpinner label="Loading notifications..." />
       ) : items.length === 0 ? (
-        <p className="mt-8 rounded-2xl border border-dashed border-slate-700 p-12 text-center text-slate-500">No notifications yet.</p>
+        <div className="mt-8"><EmptyState title="No notifications yet" description="Order, alert, and simulator updates will appear here." /></div>
       ) : (
         <div className="mt-8 space-y-4">
           {items.map((item) => (
