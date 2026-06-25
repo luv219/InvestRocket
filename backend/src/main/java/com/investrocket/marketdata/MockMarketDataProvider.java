@@ -1,25 +1,19 @@
 package com.investrocket.marketdata;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.investrocket.marketdata.dto.StockQuoteResponse;
 import com.investrocket.marketdata.dto.StockSearchResult;
-import com.investrocket.exception.StockNotFoundException;
 
 @Component
-@ConditionalOnProperty(
-        prefix = "app.financial-api",
-        name = "provider",
-        havingValue = "mock",
-        matchIfMissing = true)
 public class MockMarketDataProvider implements MarketDataProvider {
 
     private static final Map<String, MockStock> STOCKS = createStocks();
@@ -38,9 +32,43 @@ public class MockMarketDataProvider implements MarketDataProvider {
     public StockQuoteResponse getQuote(String symbol) {
         MockStock stock = STOCKS.get(symbol);
         if (stock == null) {
-            throw new StockNotFoundException(symbol);
+            return generatedQuote(symbol);
         }
         return stock.toQuoteResponse();
+    }
+
+    private StockQuoteResponse generatedQuote(String symbol) {
+        String normalizedSymbol = symbol.toUpperCase(Locale.ROOT);
+        long seed = Integer.toUnsignedLong(normalizedSymbol.hashCode());
+        BigDecimal currentPrice = BigDecimal.valueOf(25 + seed % 47_500)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal previousClose = currentPrice.multiply(new BigDecimal("0.9975"))
+                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal changeAmount = currentPrice.subtract(previousClose)
+                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal changePercent = changeAmount
+                .divide(previousClose, 6, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(2, RoundingMode.HALF_UP);
+        boolean indianSymbol = normalizedSymbol.endsWith(".NS")
+                || normalizedSymbol.endsWith(".BO");
+
+        return new StockQuoteResponse(
+                normalizedSymbol,
+                normalizedSymbol + " Simulated Quote",
+                currentPrice,
+                changeAmount,
+                changePercent,
+                previousClose,
+                currentPrice.multiply(new BigDecimal("1.01"))
+                        .setScale(2, RoundingMode.HALF_UP),
+                previousClose.multiply(new BigDecimal("0.99"))
+                        .setScale(2, RoundingMode.HALF_UP),
+                previousClose,
+                100_000L + seed % 9_900_000L,
+                Instant.now(),
+                indianSymbol ? "INR" : "USD",
+                "mock");
     }
 
     private static Map<String, MockStock> createStocks() {
@@ -73,7 +101,57 @@ public class MockMarketDataProvider implements MarketDataProvider {
                 "META", "Meta Platforms, Inc.", "NASDAQ", "USD", "Common Stock",
                 "610.42", "5.67", "0.94", "604.80", "613.25", "603.90",
                 "604.75", 18_750_000L));
+        stocks.put("RELIANCE.NS", indianStock(
+                "RELIANCE.NS", "Reliance Industries Limited", "2965.40", "18.30"));
+        stocks.put("TCS.NS", indianStock(
+                "TCS.NS", "Tata Consultancy Services Limited", "3812.65", "-12.45"));
+        stocks.put("INFY.NS", indianStock(
+                "INFY.NS", "Infosys Limited", "1598.20", "9.75"));
+        stocks.put("HDFCBANK.NS", indianStock(
+                "HDFCBANK.NS", "HDFC Bank Limited", "1734.55", "6.80"));
+        stocks.put("ICICIBANK.NS", indianStock(
+                "ICICIBANK.NS", "ICICI Bank Limited", "1421.35", "-4.25"));
+        stocks.put("SBIN.NS", indianStock(
+                "SBIN.NS", "State Bank of India", "812.70", "3.60"));
+        stocks.put("ITC.NS", indianStock(
+                "ITC.NS", "ITC Limited", "432.15", "1.85"));
+        stocks.put("LT.NS", indianStock(
+                "LT.NS", "Larsen & Toubro Limited", "3650.80", "22.10"));
+        stocks.put("BHARTIARTL.NS", indianStock(
+                "BHARTIARTL.NS", "Bharti Airtel Limited", "1872.40", "11.25"));
+        stocks.put("HINDUNILVR.NS", indianStock(
+                "HINDUNILVR.NS", "Hindustan Unilever Limited", "2418.90", "-8.10"));
         return Map.copyOf(stocks);
+    }
+
+    private static MockStock indianStock(
+            String symbol,
+            String companyName,
+            String currentPrice,
+            String changeAmount) {
+        BigDecimal current = new BigDecimal(currentPrice);
+        BigDecimal change = new BigDecimal(changeAmount);
+        BigDecimal previousClose = current.subtract(change);
+        BigDecimal changePercent = change
+                .divide(previousClose, 6, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+        return new MockStock(
+                symbol,
+                companyName,
+                "NSE",
+                "INR",
+                "Common Stock",
+                current.toPlainString(),
+                change.toPlainString(),
+                changePercent.setScale(2, RoundingMode.HALF_UP).toPlainString(),
+                previousClose.multiply(new BigDecimal("1.001")).setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString(),
+                current.multiply(new BigDecimal("1.008")).setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString(),
+                previousClose.multiply(new BigDecimal("0.992")).setScale(2, RoundingMode.HALF_UP)
+                        .toPlainString(),
+                previousClose.setScale(2, RoundingMode.HALF_UP).toPlainString(),
+                5_000_000L);
     }
 
     private record MockStock(

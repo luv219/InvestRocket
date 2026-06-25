@@ -87,8 +87,10 @@ Required backend variables:
 | `FRONTEND_URL` | Allowed browser origin |
 | `JWT_SECRET` | JWT signing secret with at least 32 characters |
 | `JWT_EXPIRATION_MS` | Access token lifetime in milliseconds |
-| `FINANCIAL_API_PROVIDER` | `mock` by default, or `finnhub` |
-| `FINANCIAL_API_KEY` | Required only for the Finnhub provider |
+| `FINANCIAL_API_PROVIDER` | `hybrid`, `finnhub`, `twelvedata`, or `mock` |
+| `FINNHUB_API_KEY` | Finnhub key; falls back to legacy `FINANCIAL_API_KEY` when unset |
+| `TWELVE_DATA_API_KEY` | Twelve Data key for `.NS` and `.BO` symbols |
+| `FINANCIAL_API_KEY` | Legacy Finnhub key retained for backward compatibility |
 | `PENDING_ORDER_PROCESSOR_ENABLED` | Enables scheduled pending-order checks |
 | `PENDING_ORDER_PROCESSOR_INTERVAL_MS` | Delay between checks; defaults to `30000` |
 | `LIVE_PRICE_STREAM_ENABLED` | Enables the mock WebSocket price generator |
@@ -199,7 +201,12 @@ The frontend never calls a financial data provider directly, and provider API ke
 ### Providers
 
 - `mock`: default development provider with deterministic sample symbols and no API key
-- `finnhub`: uses Finnhub search, quote, and company profile endpoints; requires `FINANCIAL_API_KEY`
+- `hybrid`: routes `.NS` and `.BO` symbols to Twelve Data and all other symbols to Finnhub
+- `finnhub`: uses only Finnhub; requires `FINNHUB_API_KEY` or legacy `FINANCIAL_API_KEY`
+- `twelvedata`: uses only Twelve Data; requires `TWELVE_DATA_API_KEY`
+
+External provider failures, invalid prices, unsupported symbols, rate limits, and timeouts fall
+back to safe simulated quotes so the educational trading flow remains available.
 
 Finnhub quote responses do not include trade volume in the basic quote payload, so `volume` can be unavailable when that provider is selected.
 
@@ -397,6 +404,16 @@ docker compose up --build
 ```
 
 Recommended hosting: Vercel or Netlify for the frontend, Render or Railway for the backend, and Neon PostgreSQL for data. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and [docs/SECURITY.md](docs/SECURITY.md).
+
+For a Render backend deployment, configure:
+
+```text
+FINANCIAL_API_PROVIDER=hybrid
+FINNHUB_API_KEY=
+TWELVE_DATA_API_KEY=
+```
+
+Set both API key values through Render secrets. The backend never sends or logs these keys.
 
 ## CI/CD
 

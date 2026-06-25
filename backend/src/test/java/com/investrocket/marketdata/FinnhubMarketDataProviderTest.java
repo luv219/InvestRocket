@@ -18,6 +18,6 @@ class FinnhubMarketDataProviderTest {
 
         assertThatThrownBy(() -> provider.getQuote("AAPL"))
                 .isInstanceOf(MarketDataConfigurationException.class)
-                .hasMessageContaining("FINANCIAL_API_KEY");
+                .hasMessageContaining("FINNHUB_API_KEY");
     }
 }

@@ -1,11 +1,8 @@
 package com.investrocket.marketdata;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
-
-import com.investrocket.exception.StockNotFoundException;
 
 class MockMarketDataProviderTest {
 
@@ -31,8 +28,19 @@ class MockMarketDataProviderTest {
     }
 
     @Test
-    void rejectsUnknownSymbol() {
-        assertThatThrownBy(() -> provider.getQuote("UNKNOWN"))
-                .isInstanceOf(StockNotFoundException.class);
+    void returnsSafeGeneratedQuoteForUnknownSymbol() {
+        var quote = provider.getQuote("UNKNOWN");
+
+        assertThat(quote.symbol()).isEqualTo("UNKNOWN");
+        assertThat(quote.currentPrice()).isPositive();
+        assertThat(quote.provider()).isEqualTo("mock");
+    }
+
+    @Test
+    void includesIndianSymbols() {
+        var quote = provider.getQuote("RELIANCE.NS");
+
+        assertThat(quote.currency()).isEqualTo("INR");
+        assertThat(quote.currentPrice()).isPositive();
     }
 }

@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -21,10 +20,6 @@ import com.investrocket.marketdata.dto.StockQuoteResponse;
 import com.investrocket.marketdata.dto.StockSearchResult;
 
 @Component
-@ConditionalOnProperty(
-        prefix = "app.financial-api",
-        name = "provider",
-        havingValue = "finnhub")
 public class FinnhubMarketDataProvider implements MarketDataProvider {
 
     private final RestClient restClient;
@@ -33,7 +28,7 @@ public class FinnhubMarketDataProvider implements MarketDataProvider {
     public FinnhubMarketDataProvider(
             RestClient.Builder restClientBuilder,
             @Value("${app.financial-api.finnhub-base-url}") String baseUrl,
-            @Value("${app.financial-api.api-key:}") String apiKey) {
+            @Value("${app.financial-api.finnhub-api-key:}") String apiKey) {
         this.restClient = restClientBuilder.baseUrl(baseUrl).build();
         this.apiKey = apiKey;
     }
@@ -129,7 +124,7 @@ public class FinnhubMarketDataProvider implements MarketDataProvider {
     private void requireApiKey() {
         if (apiKey == null || apiKey.isBlank()) {
             throw new MarketDataConfigurationException(
-                    "FINANCIAL_API_KEY is required when using the Finnhub provider");
+                    "FINNHUB_API_KEY or FINANCIAL_API_KEY is required when using Finnhub");
         }
     }
 

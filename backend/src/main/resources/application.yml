@@ -29,8 +29,10 @@ app:
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   financial-api:
     provider: ${FINANCIAL_API_PROVIDER:mock}
-    api-key: ${FINANCIAL_API_KEY:}
+    finnhub-api-key: ${FINNHUB_API_KEY:${FINANCIAL_API_KEY:}}
+    twelve-data-api-key: ${TWELVE_DATA_API_KEY:}
     finnhub-base-url: ${FINNHUB_BASE_URL:https://finnhub.io/api/v1}
+    twelve-data-base-url: ${TWELVE_DATA_BASE_URL:https://api.twelvedata.com}
   pending-order-processor:
     enabled: ${PENDING_ORDER_PROCESSOR_ENABLED:true}
     interval-ms: ${PENDING_ORDER_PROCESSOR_INTERVAL_MS:30000}
