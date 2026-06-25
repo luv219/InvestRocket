@@ -1,5 +1,21 @@
 # Architecture
 
+## Final System Overview
+
+```text
+React + TypeScript + Tailwind + Recharts
+  ├── Axios REST/JWT
+  └── STOMP/WebSocket demo prices
+             ↓
+Spring Boot 3 / Java 21
+  ├── Security, validation, domain services, and admin monitoring
+  ├── MarketDataProvider abstraction
+  ├── Scheduled order, alert, snapshot, and price processors
+  └── Flyway + Spring Data JPA
+             ↓
+Neon PostgreSQL over TLS
+```
+
 ## System Context
 
 ```text
@@ -224,3 +240,24 @@ The Phase 1 frontend stores the access token in `localStorage` for development s
 ## Development
 
 Backend commands use Maven Daemon (`mvnd`) only. Frontend commands use npm.
+
+## Testing Strategy
+
+- JUnit 5 and Mockito cover business rules, ownership checks, calculations, and scheduler behavior.
+- MockMvc covers authentication, validation, response secrecy, and USER/ADMIN boundaries.
+- Vitest, Testing Library, and jsdom cover pages, forms, route guards, navigation roles, Axios authorization, and service contracts.
+- Test and production-build commands run independently to catch behavioral and packaging failures.
+
+## Deployment Architecture
+
+```text
+Browser
+  ↓ HTTPS / WSS
+Static frontend hosting or nginx container
+  ↓ HTTPS / WSS
+Spring Boot service
+  ↓ JDBC TLS (sslmode=require)
+Neon PostgreSQL
+```
+
+`VITE_API_BASE_URL` and `VITE_WS_BASE_URL` are frontend build-time configuration. Backend CORS and WebSocket origins use the exact `FRONTEND_URL`. The production profile validates migrations, suppresses error details, limits Actuator exposure to health, and keeps admin bootstrap disabled by default.

@@ -2,9 +2,11 @@
 
 ## Purpose
 
-Invest Rocket is an educational virtual stock trading platform. It will let users practice portfolio management with simulated funds and market data without executing real-money transactions.
+Invest Rocket is a portfolio-grade educational stock trading simulator. Users practice portfolio management with simulated funds and market data without executing real-money transactions.
 
 Invest Rocket does not provide financial advice, investment recommendations, brokerage services, or access to real-money trading.
+
+The completed system demonstrates secure authentication, transactional virtual trading, scheduled processing, WebSocket updates, analytics, administration, automated testing, and containerized deployment preparation.
 
 ## Completed Foundation
 
@@ -33,6 +35,8 @@ Invest Rocket does not provide financial advice, investment recommendations, bro
 - In-app notifications for trading and simulator lifecycle events
 - Scheduled price alerts using configured market data
 - Private trading journal with optional order and trade links
+- Automated JUnit/MockMvc and Vitest/Testing Library suites
+- Production profile, Actuator health, Docker images, and deployment runbooks
 
 ## Intended Users
 
@@ -63,3 +67,11 @@ Users can now review in-app notifications, create ABOVE or BELOW price alerts, a
 - Backend development commands use Maven Daemon (`mvnd`) only.
 - External financial data requires a provider key supplied through environment variables.
 - Secrets and credentials must never be committed.
+- Production uses environment-driven configuration and Flyway schema validation.
+
+## Portfolio Highlights
+
+- Modular Spring Boot services with thin controllers and ownership checks
+- JWT, BCrypt, backend-enforced role authorization, and fixed-precision money handling
+- Mock/Finnhub provider abstraction, scheduled processors, STOMP updates, and Recharts analytics
+- Flyway-managed Neon PostgreSQL, automated regression tests, Docker, and production documentation

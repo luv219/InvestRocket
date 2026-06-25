@@ -76,7 +76,9 @@ class AuthControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").value("jwt-token"))
-                .andExpect(jsonPath("$.data.user.email").value("demo@example.com"));
+                .andExpect(jsonPath("$.data.user.email").value("demo@example.com"))
+                .andExpect(jsonPath("$.data.user.password").doesNotExist())
+                .andExpect(jsonPath("$.data.user.passwordHash").doesNotExist());
     }
 
     @Test

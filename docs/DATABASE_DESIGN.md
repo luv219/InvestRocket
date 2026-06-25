@@ -12,6 +12,25 @@ The backend connects using:
 
 Flyway owns schema changes. `V7__admin_monitoring_indexes.sql` adds Phase 8 indexes for administrative queries.
 
+Production uses Hibernate `ddl-auto=validate`; Flyway is authoritative and the application never creates or drops production tables automatically.
+
+## Final Table Inventory
+
+| Table | Purpose |
+| --- | --- |
+| `users` | Identity, profile, role, and account status |
+| `wallets` | Virtual cash, reserved funds, and initial balance |
+| `holdings` | Current positions and locked quantities |
+| `orders` | Simulated order lifecycle |
+| `trades` | Simulated executions |
+| `watchlist_items` | User-owned tracked symbols |
+| `portfolio_snapshots` | Historical valuation and return points |
+| `user_risk_settings` | Per-user trading controls |
+| `audit_logs` | Non-sensitive account activity |
+| `notifications` | In-app messages |
+| `price_alerts` | Price threshold lifecycle |
+| `trading_journal_entries` | Private trading notes |
+
 ## Users
 
 | Column | Type | Rules |

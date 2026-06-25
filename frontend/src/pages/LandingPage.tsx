@@ -37,8 +37,10 @@ export function LandingPage() {
               Login
             </Link>
           </div>
-          <p className="mt-6 text-sm text-slate-500">
-            Simulation only. No real-money trading or financial advice.
+          <p className="mt-6 max-w-2xl text-sm text-slate-500">
+            Invest Rocket is a virtual trading simulator for educational purposes
+            only. It does not provide financial advice and does not execute real
+            trades.
           </p>
         </div>
 

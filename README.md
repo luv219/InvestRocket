@@ -1,14 +1,23 @@
 # Invest Rocket
 
-Invest Rocket is a full-stack virtual stock trading simulator for learning, experimentation, and portfolio demonstration. Users will eventually be able to register, receive virtual funds, explore market data, place simulated orders, and monitor portfolio performance.
+Invest Rocket is a full-stack virtual stock trading simulator for learning, experimentation, and portfolio demonstration. Users register, receive virtual funds, explore market data, place simulated orders, analyze performance, and maintain alerts and a trading journal.
 
 > **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
 
-## Phase 9 Status
+## Phase 10 Status
 
-Phase 9 adds authenticated in-app notifications, scheduled price alerts, and a private trading journal linked optionally to owned orders and trades.
+Invest Rocket is now a tested, container-ready portfolio project with production configuration, deployment documentation, security guidance, and automated backend/frontend verification.
 
 The admin bootstrap is disabled by default and never contains a real credential in source control.
+
+## Live Demo
+
+- Frontend: _Add deployed URL_
+- Backend health: _Add deployed `/api/health` URL_
+
+## Screenshots
+
+Add final screenshots under `docs/screenshots/` for the dashboard, market, analytics, notifications, journal, and administrator views.
 
 ## Tech Stack
 
@@ -23,9 +32,9 @@ The admin bootstrap is disabled by default and never contains a real credential 
 - Analytics: Portfolio snapshots, P/L metrics, allocation, trading statistics, and Recharts
 - Account safety: Profile settings, password change, risk controls, simulator reset, and audit logs
 - Administration: User management, platform monitoring, admin audit visibility, and system health
-- Planned: TanStack Query, Redis pub/sub, and Docker
+- Production readiness: Automated tests, Docker images, Neon-based compose, health checks, and deployment runbooks
 
-## Planned Features
+## Completed Features
 
 - User registration and JWT authentication — complete
 - Virtual wallet creation with starting funds — complete
@@ -323,7 +332,7 @@ Order execution, pending-order creation/cancellation, simulator reset, and trigg
 
 ```bash
 git add .
-git commit -m "feat: implement phase 9 notifications alerts and trading journal"
+git commit -m "chore: add phase 10 testing hardening and deployment preparation"
 ```
 
 ## Roadmap
@@ -338,13 +347,50 @@ git commit -m "feat: implement phase 9 notifications alerts and trading journal"
 - Phase 7: Profile settings, risk controls, reset, and audit logs — complete
 - Phase 8: Admin dashboard and platform monitoring — complete
 - Phase 9: Notifications, price alerts, and trading journal — complete
-- Phase 10: Redis caching, Docker support, testing, and deployment hardening
+- Phase 10: Testing, hardening, Docker, and deployment preparation — complete
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 
 ## API Documentation
 
 The API conventions and authentication, market-data, and advanced-order contracts are described in [docs/API_DESIGN.md](docs/API_DESIGN.md).
+
+## Testing
+
+```bash
+cd backend
+mvnd test
+```
+
+```bash
+cd frontend
+npm test
+```
+
+See [docs/TESTING.md](docs/TESTING.md) for automated coverage and the manual release checklist.
+
+## Production Builds
+
+```bash
+cd backend
+mvnd clean package
+```
+
+```bash
+cd frontend
+npm install
+npm run build
+```
+
+## Docker and Deployment
+
+`docker-compose.yml` builds the frontend and backend while continuing to use Neon externally.
+
+```bash
+docker compose up --build
+```
+
+Recommended hosting: Vercel or Netlify for the frontend, Render or Railway for the backend, and Neon PostgreSQL for data. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and [docs/SECURITY.md](docs/SECURITY.md).
 
 ## License
 

@@ -1,5 +1,15 @@
 # API Design
 
+## Access Classification
+
+| Access | Endpoints |
+| --- | --- |
+| Public | `GET /api/health`, `POST /api/auth/register`, `POST /api/auth/login`, `GET /actuator/health`, and the `/ws` handshake |
+| Authenticated user | Profile, risk, market, watchlist, order, trade, portfolio, analytics, notification, alert, journal, and activity APIs |
+| Administrator | Every `/api/admin/**` endpoint |
+
+The backend is authoritative. Unsupported enum values, malformed JSON, and validation failures return sanitized error envelopes without stack traces.
+
 ## Conventions
 
 - Base path: `/api`

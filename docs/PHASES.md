@@ -101,11 +101,13 @@ Status: complete. Backend authorization is authoritative; frontend role checks p
 
 Status: complete. Notifications are in-app only, alerts use configured simulator market data, and all records are scoped to the authenticated user.
 
-## Phase 10 — Hardening and Delivery
+## Phase 10 — Testing, Hardening, and Deployment Preparation
 
-- Redis quote caching
-- Docker support
-- Broader automated testing
-- Observability, security review, CI/CD, and deployment
+- Expanded backend regression and ownership tests
+- Vitest and React Testing Library frontend suite
+- Production profile and sanitized error handling
+- Backend/frontend Docker images and Neon-based compose
+- Deployment, testing, and security runbooks
+- Portfolio-ready final documentation
 
-Backend workflows use `mvnd`; a local PostgreSQL server is never required.
+Status: complete. Backend workflows use `mvnd`; a local PostgreSQL server is never required.
