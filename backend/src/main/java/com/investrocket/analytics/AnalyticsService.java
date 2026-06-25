@@ -51,15 +51,17 @@ public class AnalyticsService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final Clock clock;
-    private AuditLogService auditLogService;
+    private final AuditLogService auditLogService;
 
+    @Autowired
     public AnalyticsService(
             PortfolioSnapshotRepository snapshotRepository,
             PortfolioService portfolioService,
             WalletRepository walletRepository,
             TradeRepository tradeRepository,
             OrderRepository orderRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AuditLogService auditLogService) {
         this(
                 snapshotRepository,
                 portfolioService,
@@ -67,7 +69,8 @@ public class AnalyticsService {
                 tradeRepository,
                 orderRepository,
                 userRepository,
-                Clock.systemUTC());
+                Clock.systemUTC(),
+                auditLogService);
     }
 
     AnalyticsService(
@@ -78,6 +81,26 @@ public class AnalyticsService {
             OrderRepository orderRepository,
             UserRepository userRepository,
             Clock clock) {
+        this(
+                snapshotRepository,
+                portfolioService,
+                walletRepository,
+                tradeRepository,
+                orderRepository,
+                userRepository,
+                clock,
+                null);
+    }
+
+    private AnalyticsService(
+            PortfolioSnapshotRepository snapshotRepository,
+            PortfolioService portfolioService,
+            WalletRepository walletRepository,
+            TradeRepository tradeRepository,
+            OrderRepository orderRepository,
+            UserRepository userRepository,
+            Clock clock,
+            AuditLogService auditLogService) {
         this.snapshotRepository = snapshotRepository;
         this.portfolioService = portfolioService;
         this.walletRepository = walletRepository;
@@ -85,10 +108,6 @@ public class AnalyticsService {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.clock = clock;
-    }
-
-    @Autowired
-    void setAuditLogService(AuditLogService auditLogService) {
         this.auditLogService = auditLogService;
     }
 
