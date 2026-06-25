@@ -1,0 +1,54 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      FINANCIAL_API_PROVIDER: mock
+      PENDING_ORDER_PROCESSOR_ENABLED: "false"
+      LIVE_PRICE_STREAM_ENABLED: "false"
+      PORTFOLIO_SNAPSHOT_ENABLED: "false"
+      PRICE_ALERT_PROCESSOR_ENABLED: "false"
+      ADMIN_BOOTSTRAP_ENABLED: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Run backend tests
+        run: mvn --batch-mode test
+
+      - name: Build backend package
+        run: mvn --batch-mode --skip-tests package
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: invest-rocket-backend
+          path: backend/target/*.jar
+          if-no-files-found: error

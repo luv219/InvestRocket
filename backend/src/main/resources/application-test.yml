@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/invest_rocket_test
+    username: test
+    password: test
+  jpa:
+    show-sql: false
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    secret: test_secret_that_is_at_least_32_characters_long
+    expiration-ms: 86400000
+  financial-api:
+    provider: mock
+  pending-order-processor:
+    enabled: false
+  live-price-stream:
+    enabled: false
+  portfolio-snapshot:
+    enabled: false
+  price-alert-processor:
+    enabled: false
+  admin-bootstrap:
+    enabled: false
+
+logging:
+  level:
+    root: WARN
+    com.investrocket: INFO

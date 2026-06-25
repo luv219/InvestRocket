@@ -4,7 +4,7 @@
 
 Invest Rocket is a portfolio-grade educational stock trading simulator. Users practice portfolio management with simulated funds and market data without executing real-money transactions.
 
-Invest Rocket does not provide financial advice, investment recommendations, brokerage services, or access to real-money trading.
+Invest Rocket is a virtual trading simulator for educational purposes only. It does not provide financial advice and does not execute real trades.
 
 The completed system demonstrates secure authentication, transactional virtual trading, scheduled processing, WebSocket updates, analytics, administration, automated testing, and containerized deployment preparation.
 

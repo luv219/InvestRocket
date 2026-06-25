@@ -2,11 +2,11 @@
 
 Invest Rocket is a full-stack virtual stock trading simulator for learning, experimentation, and portfolio demonstration. Users register, receive virtual funds, explore market data, place simulated orders, analyze performance, and maintain alerts and a trading journal.
 
-> **Disclaimer:** Invest Rocket supports simulated trading only. It does not execute real-money trades, provide financial advice, or recommend investments.
+> **Disclaimer:** Invest Rocket is a virtual trading simulator for educational purposes only. It does not provide financial advice and does not execute real trades.
 
-## Phase 10 Status
+## Phase 11 Status
 
-Invest Rocket is now a tested, container-ready portfolio project with production configuration, deployment documentation, security guidance, and automated backend/frontend verification.
+Invest Rocket is launch-ready with GitHub Actions CI, production environment references, Render/Railway/Vercel/Netlify deployment guidance, Neon migration notes, Docker assets, and a final portfolio walkthrough.
 
 The admin bootstrap is disabled by default and never contains a real credential in source control.
 
@@ -17,7 +17,7 @@ The admin bootstrap is disabled by default and never contains a real credential 
 
 ## Screenshots
 
-Add final screenshots under `docs/screenshots/` for the dashboard, market, analytics, notifications, journal, and administrator views.
+Add final screenshots under `docs/screenshots/`. The complete capture checklist is in [docs/screenshots/README.md](docs/screenshots/README.md).
 
 ## Tech Stack
 
@@ -54,10 +54,12 @@ Add final screenshots under `docs/screenshots/` for the dashboard, market, analy
 
 ```text
 InvestRocket/
+├── .github/       Backend and frontend CI workflows
 ├── backend/       Spring Boot API
 ├── frontend/      React application
 ├── docs/          Product and architecture documentation
-├── docker/        Placeholder for future container support
+├── docker/        Reserved infrastructure notes
+├── docker-compose.yml
 ├── .env.example   Environment variable template
 └── README.md
 ```
@@ -78,6 +80,7 @@ Required backend variables:
 
 | Variable | Purpose |
 | --- | --- |
+| `SPRING_PROFILES_ACTIVE` | `dev` locally and `prod` in deployment |
 | `DATABASE_URL` | Neon JDBC URL including `sslmode=require` |
 | `DATABASE_USERNAME` | Neon database role |
 | `DATABASE_PASSWORD` | Neon database password |
@@ -105,6 +108,7 @@ PowerShell example for the current terminal:
 $env:DATABASE_URL="jdbc:postgresql://your-neon-hostname.neon.tech/your-db-name?sslmode=require"
 $env:DATABASE_USERNAME="your_neon_username"
 $env:DATABASE_PASSWORD="your_neon_password"
+$env:SPRING_PROFILES_ACTIVE="dev"
 $env:JWT_SECRET="replace_with_long_secure_secret_at_least_32_characters"
 $env:JWT_EXPIRATION_MS="86400000"
 $env:FRONTEND_URL="http://localhost:5173"
@@ -157,7 +161,7 @@ Expected response:
 }
 ```
 
-Flyway automatically applies all migrations through `V7__admin_monitoring_indexes.sql` to the configured Neon database at startup.
+Flyway automatically applies all migrations through `V8__create_notifications_alerts_and_journal.sql` to the configured Neon database at startup.
 
 ## Run the Frontend
 
@@ -332,7 +336,7 @@ Order execution, pending-order creation/cancellation, simulator reset, and trigg
 
 ```bash
 git add .
-git commit -m "chore: add phase 10 testing hardening and deployment preparation"
+git commit -m "chore: prepare phase 11 production deployment and launch readiness"
 ```
 
 ## Roadmap
@@ -348,6 +352,7 @@ git commit -m "chore: add phase 10 testing hardening and deployment preparation"
 - Phase 8: Admin dashboard and platform monitoring — complete
 - Phase 9: Notifications, price alerts, and trading journal — complete
 - Phase 10: Testing, hardening, Docker, and deployment preparation — complete
+- Phase 11: CI/CD, production deployment, and portfolio launch readiness — complete
 
 See [docs/PHASES.md](docs/PHASES.md) for scope boundaries.
 
@@ -391,6 +396,32 @@ docker compose up --build
 ```
 
 Recommended hosting: Vercel or Netlify for the frontend, Render or Railway for the backend, and Neon PostgreSQL for data. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and [docs/SECURITY.md](docs/SECURITY.md).
+
+## CI/CD
+
+- `backend-ci.yml`: Java 21, dependency cache, backend tests, package build, and JAR artifact
+- `frontend-ci.yml`: Node.js 22, clean install, tests, lint, production build, and static artifact
+
+Both workflows run on pushes and pull requests only when their respective project files change. CI uses the standard Maven executable available on GitHub-hosted runners; all local backend commands remain `mvnd` only.
+
+Workflow badges are intentionally omitted until the final GitHub repository owner/name is fixed.
+
+## Launch Resources
+
+- [Environment variables](docs/ENVIRONMENT_VARIABLES.md)
+- [Deployment guide](docs/DEPLOYMENT.md)
+- [Security review](docs/SECURITY.md)
+- [Testing strategy](docs/TESTING.md)
+- [5–7 minute demo script](docs/DEMO_SCRIPT.md)
+- [Final launch checklist](docs/FINAL_CHECKLIST.md)
+
+## Security Notes
+
+JWT authentication, BCrypt password hashing, backend role enforcement, exact-origin CORS, backend-only API keys, disabled-by-default admin bootstrap, Flyway validation, and sanitized errors are implemented. Production improvements such as secure cookie tokens, refresh-token rotation, and rate limiting remain documented in [docs/SECURITY.md](docs/SECURITY.md).
+
+## Author
+
+Author/contact: _Add your name, portfolio URL, and GitHub profile_
 
 ## License
 

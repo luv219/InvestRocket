@@ -16,6 +16,12 @@ spring:
   flyway:
     enabled: true
 
+app:
+  cors:
+    allowed-origin: ${FRONTEND_URL}
+  admin-bootstrap:
+    enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
+
 logging:
   level:
     root: INFO

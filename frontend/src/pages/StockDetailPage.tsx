@@ -296,8 +296,9 @@ export function StockDetailPage() {
         </p>
         <h2 className="mt-2 text-2xl font-bold text-white">Place an order</h2>
         <p className="mt-2 text-sm text-amber-200">
-          All orders use simulated funds. Pending orders are checked
-          periodically.
+          Invest Rocket is a virtual trading simulator for educational purposes
+          only. It does not provide financial advice and does not execute real
+          trades.
         </p>
 
         <form

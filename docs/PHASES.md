@@ -111,3 +111,14 @@ Status: complete. Notifications are in-app only, alerts use configured simulator
 - Portfolio-ready final documentation
 
 Status: complete. Backend workflows use `mvnd`; a local PostgreSQL server is never required.
+
+## Phase 11 — Production Deployment and Launch Readiness
+
+- Backend and frontend GitHub Actions workflows
+- Hosted-platform port and production profile cleanup
+- Render, Railway, Vercel, Netlify, Docker, and Neon deployment guidance
+- Production environment variable reference
+- CORS and WSS deployment checklist
+- Demo script, screenshot plan, and final launch checklist
+
+Status: complete. No product features were added; this phase prepares the existing simulator for deployment and portfolio presentation.

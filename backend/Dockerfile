@@ -9,6 +9,7 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 RUN addgroup -S investrocket && adduser -S investrocket -G investrocket
 COPY --from=build /workspace/target/*.jar app.jar
+ENV SPRING_PROFILES_ACTIVE=prod
 USER investrocket
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar", "--spring.profiles.active=prod"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

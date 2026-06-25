@@ -261,3 +261,12 @@ Neon PostgreSQL
 ```
 
 `VITE_API_BASE_URL` and `VITE_WS_BASE_URL` are frontend build-time configuration. Backend CORS and WebSocket origins use the exact `FRONTEND_URL`. The production profile validates migrations, suppresses error details, limits Actuator exposure to health, and keeps admin bootstrap disabled by default.
+
+## CI/CD
+
+GitHub Actions separates backend and frontend checks using path filters:
+
+- Backend CI configures Java 21, runs tests, builds the JAR, and uploads the artifact.
+- Frontend CI configures Node.js 22, runs tests and lint, builds Vite assets, and uploads `dist`.
+
+No Neon or financial-provider secrets are required in CI. Backend CI uses the mock provider, disables scheduled jobs, and supplies non-production placeholder configuration.
