@@ -21,6 +21,17 @@ app:
     allowed-origin: ${FRONTEND_URL}
   admin-bootstrap:
     enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    auth-login-per-minute: ${RATE_LIMIT_AUTH_LOGIN_PER_MINUTE:5}
+    auth-register-per-minute: ${RATE_LIMIT_AUTH_REGISTER_PER_MINUTE:3}
+    market-quote-per-minute: ${RATE_LIMIT_MARKET_QUOTE_PER_MINUTE:30}
+    market-search-per-minute: ${RATE_LIMIT_MARKET_SEARCH_PER_MINUTE:20}
+    orders-per-minute: ${RATE_LIMIT_ORDERS_PER_MINUTE:20}
+    watchlist-per-minute: ${RATE_LIMIT_WATCHLIST_PER_MINUTE:60}
+    default-per-minute: ${RATE_LIMIT_DEFAULT_PER_MINUTE:120}
+    finnhub-per-minute: ${FINNHUB_RATE_LIMIT_PER_MINUTE:50}
+    twelve-data-per-minute: ${TWELVE_DATA_RATE_LIMIT_PER_MINUTE:8}
 
 logging:
   level:

@@ -18,25 +18,31 @@ import com.investrocket.exception.MarketDataRateLimitException;
 import com.investrocket.exception.StockNotFoundException;
 import com.investrocket.marketdata.dto.StockQuoteResponse;
 import com.investrocket.marketdata.dto.StockSearchResult;
+import com.investrocket.ratelimit.ProviderRateLimiter;
+import com.investrocket.ratelimit.ProviderRateLimiter.Provider;
 
 @Component
 public class FinnhubMarketDataProvider implements MarketDataProvider {
 
     private final RestClient restClient;
     private final String apiKey;
+    private final ProviderRateLimiter providerRateLimiter;
 
     public FinnhubMarketDataProvider(
             RestClient.Builder restClientBuilder,
             @Value("${app.financial-api.finnhub-base-url}") String baseUrl,
-            @Value("${app.financial-api.finnhub-api-key:}") String apiKey) {
+            @Value("${app.financial-api.finnhub-api-key:}") String apiKey,
+            ProviderRateLimiter providerRateLimiter) {
         this.restClient = restClientBuilder.baseUrl(baseUrl).build();
         this.apiKey = apiKey;
+        this.providerRateLimiter = providerRateLimiter;
     }
 
     @Override
     public List<StockSearchResult> searchStocks(String query) {
         requireApiKey();
         try {
+            providerRateLimiter.acquireOrThrow(Provider.FINNHUB);
             FinnhubSearchResponse response = restClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/search")
@@ -72,6 +78,7 @@ public class FinnhubMarketDataProvider implements MarketDataProvider {
     public StockQuoteResponse getQuote(String symbol) {
         requireApiKey();
         try {
+            providerRateLimiter.acquireOrThrow(Provider.FINNHUB);
             FinnhubQuoteResponse quote = restClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/quote")
@@ -80,6 +87,7 @@ public class FinnhubMarketDataProvider implements MarketDataProvider {
                             .build())
                     .retrieve()
                     .body(FinnhubQuoteResponse.class);
+            providerRateLimiter.acquireOrThrow(Provider.FINNHUB);
             FinnhubProfileResponse profile = restClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/stock/profile2")

@@ -19,19 +19,24 @@ import com.investrocket.exception.MarketDataRateLimitException;
 import com.investrocket.exception.StockNotFoundException;
 import com.investrocket.marketdata.dto.StockQuoteResponse;
 import com.investrocket.marketdata.dto.StockSearchResult;
+import com.investrocket.ratelimit.ProviderRateLimiter;
+import com.investrocket.ratelimit.ProviderRateLimiter.Provider;
 
 @Component
 public class TwelveDataMarketDataProvider implements MarketDataProvider {
 
     private final RestClient restClient;
     private final String apiKey;
+    private final ProviderRateLimiter providerRateLimiter;
 
     public TwelveDataMarketDataProvider(
             RestClient.Builder restClientBuilder,
             @Value("${app.financial-api.twelve-data-base-url}") String baseUrl,
-            @Value("${app.financial-api.twelve-data-api-key:}") String apiKey) {
+            @Value("${app.financial-api.twelve-data-api-key:}") String apiKey,
+            ProviderRateLimiter providerRateLimiter) {
         this.restClient = restClientBuilder.baseUrl(baseUrl).build();
         this.apiKey = apiKey;
+        this.providerRateLimiter = providerRateLimiter;
     }
 
     @Override
@@ -39,6 +44,7 @@ public class TwelveDataMarketDataProvider implements MarketDataProvider {
         requireApiKey();
         TwelveDataSymbol requested = TwelveDataSymbol.from(query);
         try {
+            providerRateLimiter.acquireOrThrow(Provider.TWELVE_DATA);
             TwelveDataSearchResponse response = restClient.get()
                     .uri(uriBuilder -> {
                         var builder = uriBuilder
@@ -80,6 +86,7 @@ public class TwelveDataMarketDataProvider implements MarketDataProvider {
         requireApiKey();
         TwelveDataSymbol requested = TwelveDataSymbol.from(symbol);
         try {
+            providerRateLimiter.acquireOrThrow(Provider.TWELVE_DATA);
             TwelveDataQuoteResponse quote = restClient.get()
                     .uri(uriBuilder -> {
                         var builder = uriBuilder

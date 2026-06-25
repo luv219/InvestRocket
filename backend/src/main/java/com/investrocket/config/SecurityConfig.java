@@ -1,5 +1,6 @@
 package com.investrocket.config;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.investrocket.auth.JwtAuthenticationFilter;
+import com.investrocket.ratelimit.ApiRateLimitFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -23,17 +25,20 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
+    private final ObjectProvider<ApiRateLimitFilter> rateLimitFilterProvider;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
-            RestAuthenticationEntryPoint authenticationEntryPoint) {
+            RestAuthenticationEntryPoint authenticationEntryPoint,
+            ObjectProvider<ApiRateLimitFilter> rateLimitFilterProvider) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
+        this.rateLimitFilterProvider = rateLimitFilterProvider;
     }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session ->
@@ -53,8 +58,13 @@ public class SecurityConfig {
                         .authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
-                .build();
+                .httpBasic(basic -> basic.disable());
+
+        ApiRateLimitFilter rateLimitFilter = rateLimitFilterProvider.getIfAvailable();
+        if (rateLimitFilter != null) {
+            http.addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class);
+        }
+        return http.build();
     }
 
     @Bean

@@ -12,6 +12,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 import com.investrocket.exception.MarketDataProviderException;
+import com.investrocket.exception.ProviderRateLimitExceededException;
 import com.investrocket.marketdata.dto.StockQuoteResponse;
 
 class HybridMarketDataProviderTest {
@@ -76,6 +77,18 @@ class HybridMarketDataProviderTest {
         assertThat(quote.symbol()).isEqualTo("UNKNOWN");
         assertThat(quote.currentPrice()).isPositive();
         assertThat(quote.provider()).isEqualTo("mock");
+    }
+
+    @Test
+    void providerLimitExhaustionFallsBackToMock() {
+        HybridMarketDataProvider provider = provider("hybrid");
+        when(finnhubProvider.getQuote("AAPL"))
+                .thenThrow(new ProviderRateLimitExceededException("Finnhub"));
+
+        var quote = provider.getQuote("AAPL");
+
+        assertThat(quote.provider()).isEqualTo("mock");
+        verify(finnhubProvider).getQuote("AAPL");
     }
 
     private HybridMarketDataProvider provider(String mode) {
