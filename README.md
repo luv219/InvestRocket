@@ -414,34 +414,3 @@ TWELVE_DATA_API_KEY=
 ```
 
 Set both API key values through Render secrets. The backend never sends or logs these keys.
-
-## CI/CD
-
-- `backend-ci.yml`: Java 21, dependency cache, backend tests, package build, and JAR artifact
-- `frontend-ci.yml`: Node.js 22, clean install, tests, lint, production build, and static artifact
-
-Both workflows run on pushes and pull requests only when their respective project files change. CI uses the standard Maven executable available on GitHub-hosted runners; all local backend commands remain `mvnd` only.
-
-Workflow badges are intentionally omitted until the final GitHub repository owner/name is fixed.
-
-## Launch Resources
-
-- [Environment variables](docs/ENVIRONMENT_VARIABLES.md)
-- [Deployment guide](docs/DEPLOYMENT.md)
-- [Security review](docs/SECURITY.md)
-- [Testing strategy](docs/TESTING.md)
-- [5–7 minute demo script](docs/DEMO_SCRIPT.md)
-- [Demo data guide](docs/DEMO_DATA.md)
-- [Final launch checklist](docs/FINAL_CHECKLIST.md)
-
-## Security Notes
-
-JWT authentication, BCrypt password hashing, backend role enforcement, exact-origin CORS, backend-only API keys, disabled-by-default admin bootstrap, Flyway validation, and sanitized errors are implemented. Production improvements such as secure cookie tokens, refresh-token rotation, and rate limiting remain documented in [docs/SECURITY.md](docs/SECURITY.md).
-
-## Author
-
-Author/contact: _Add your name, portfolio URL, and GitHub profile_
-
-## License
-
-No license has been selected yet.
